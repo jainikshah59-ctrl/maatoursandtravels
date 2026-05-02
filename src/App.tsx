@@ -5,17 +5,6 @@ import {
   ArrowRight, Star, Menu, X, ChevronRight, Users, Bus
 } from 'lucide-react';
 
-/* ─── Testimonial Animation Speed ─── */
-const testimonialStyles = `
-  @keyframes testiScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  .testi-track {
-    animation: testiScroll 20s linear infinite;
-  }
-`;
-
 /* ─── Scroll Progress Hook ─── */
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -607,7 +596,19 @@ function Testimonials() {
   const allTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes testiScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .testi-track {
+          animation: testiScroll 20s linear infinite;
+        }
+        .testi-track:hover {
+          animation-play-state: paused;
+        }
+      `}} />    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-10 md:mb-16 reveal-down">
           <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
@@ -618,7 +619,7 @@ function Testimonials() {
       </div>
 
       <div className="overflow-hidden">
-        <div className="testi-track flex gap-4 md:gap-6" style={{ animationDuration: '20s' }}>
+        <div className="testi-track flex gap-4 md:gap-6">
           {allTestimonials.map((t, i) => (
             <div key={i} className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30">
               <div className="flex gap-1 mb-3 md:mb-4">
