@@ -598,7 +598,7 @@ function Testimonials() {
           100% { transform: translateX(-50%); }
         }
         .testi-track {
-          animation: testiScroll 20s linear infinite;
+          animation: testiScroll 10s linear infinite;
         }
         .testi-track:hover {
           animation-play-state: paused;
