@@ -597,6 +597,7 @@ function Testimonials() {
 
   return (
 
+          <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes testiScroll {
           0% { transform: translateX(0); }
@@ -608,7 +609,7 @@ function Testimonials() {
         .testi-track:hover {
           animation-play-state: paused;
         }
-      `}} />    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+      `}}></style>
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-10 md:mb-16 reveal-down">
           <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
