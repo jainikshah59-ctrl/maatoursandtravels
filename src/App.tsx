@@ -480,35 +480,35 @@ function Packages() {
   const packages = [
     {
       img: '/images/himachal.png',
-      dur: '4 Days / 3 Nights',
+      dur: '4 Days',
       route: 'Haridwar → Kedarnath → Return',
-      name: 'Char Dham\nYatra Pilgrimage',
-      pax: '2–20 Pax',
+      name: 'Char Dham
+Yatra Pilgrimage',
+      pax: 'Up to 6',
       vehicle: 'A/C Vehicle',
-      hotel: 'Hotel Incl.',
-      price: '₹12,000',
+      price: '₹8,500',
       featured: false,
     },
     {
       img: '/images/rajasthan.png',
-      dur: '5 Days / 4 Nights',
+      dur: '5 Days',
       route: 'Bhuj → Jaipur → Jaisalmer → Udaipur',
-      name: 'Rajasthan\nRoyal Heritage',
-      pax: '2–15 Pax',
-      vehicle: 'Luxury Van',
-      hotel: 'Meals Incl.',
-      price: '₹16,500',
+      name: 'Rajasthan
+Royal Heritage',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '₹9,500',
       featured: true,
     },
     {
       img: '/images/kerala.png',
-      dur: '6 Days / 5 Nights',
+      dur: '6 Days',
       route: 'Kochi → Munnar → Alleppey → Kovalam',
-      name: 'Kerala\nBackwaters Bliss',
-      pax: '2–10 Pax',
-      vehicle: 'Houseboat',
-      hotel: 'Resort Incl.',
-      price: '₹22,000',
+      name: 'Kerala
+Backwaters Bliss',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '₹10,500',
       featured: false,
     },
   ];
@@ -542,26 +542,27 @@ function Packages() {
               <div className="h-[180px] md:h-[220px] relative overflow-hidden">
                 <img src={pkg.img} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
-                <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-red-light rounded-sm">
+                <div className="absolute top-3 md:top-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-red-light rounded-sm">
                   {pkg.dur}
+                </div>
+                <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-white/70 rounded-sm">
+                  {pkg.vehicle}
                 </div>
               </div>
               <div className="p-4 md:p-6">
                 <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-2">{pkg.route}</div>
                 <h3 className="font-playfair text-[18px] md:text-[22px] font-normal leading-tight text-white mb-3 md:mb-4 whitespace-pre-line">{pkg.name}</h3>
-                <div className="flex flex-wrap gap-3 md:gap-4 mb-4 md:mb-5">
-                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax}</span>
-                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Bus size={11} /> {pkg.vehicle}</span>
-                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Hotel size={11} /> {pkg.hotel}</span>
+                <div className="flex items-center gap-3 mb-4 md:mb-5">
+                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax} Passengers</span>
                 </div>
                 <div className="flex items-end justify-between pt-3 md:pt-4 border-t border-white/[0.08]">
                   <div>
                     <div className="text-[9px] md:text-[10px] text-white/50 mb-0.5 md:mb-1">Starting from</div>
-                    <div className="font-playfair text-[22px] md:text-[28px] font-light text-red">{pkg.price}<span className="text-[12px] md:text-[14px] text-white/50">/person</span></div>
+                    <div className="font-playfair text-[22px] md:text-[28px] font-light text-red">{pkg.price}<span className="text-[12px] md:text-[14px] text-white/50">/trip</span></div>
                   </div>
                   <a href="#contact" className="btn-3d-wrapper">
                     <span className="btn-3d inline-block bg-white/[0.05] border border-white/[0.15] text-white text-[9px] md:text-[10px] tracking-[2px] uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-sm group-hover:bg-red group-hover:border-red group-hover:text-white transition-colors duration-300">
-                      Book Now
+                      Book Cab
                     </span>
                   </a>
                 </div>
@@ -582,28 +583,135 @@ function Testimonials() {
     { stars: 5, text: '"Very good service, enjoyed my trip a lot, cars are also good and completely satisfied with the driver. They deserve to be at the top."', name: 'Amit Patel', loc: 'Surat, Gujarat', avatar: 'A' },
     { stars: 5, text: '"Economical cost, friendly staff and drivers, affordable trip for family. Comfortable and suitable for any occasion. Absolutely loved every moment!"', name: 'Sunita Joshi', loc: 'Vadodara, Gujarat', avatar: 'S' },
     { stars: 5, text: '"Our Saurashtra darshan was perfectly planned. The driver was so knowledgeable about local temples and traditions. Truly a spiritual experience."', name: 'Deepak Trivedi', loc: 'Mumbai, Maharashtra', avatar: 'D' },
-    { stars: 5, text: '"They arranged our company\'s annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
+    { stars: 5, text: '"They arranged our company's annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
     { stars: 5, text: '"The Kutch trip was magical. Sanitized car, professional driver, great hotel recommendations. Maa Tours truly made it once in a lifetime."', name: 'Mohan Desai', loc: 'Bhavnagar, Gujarat', avatar: 'M' },
     { stars: 5, text: '"Airport pickup was seamless, driver was on time and very polite. Baggage transfer was smooth. Will use Maa Tours for all my future travel needs."', name: 'Neha Chauhan', loc: 'Junagadh, Gujarat', avatar: 'N' },
   ];
 
   const allTestimonials = [...testimonials, ...testimonials];
 
-  return (
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wasDraggingRef = useRef(false);
 
-          <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+  const clearResumeTimer = () => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  };
+
+  const startResumeTimer = () => {
+    clearResumeTimer();
+    resumeTimerRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 15000);
+  };
+
+  const handleMouseEnter = () => {
+    if (!isDragging) {
+      setIsPaused(true);
+      clearResumeTimer();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging) {
+      startResumeTimer();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!trackRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    clearResumeTimer();
+    wasDraggingRef.current = false;
+    setStartX(e.pageX - trackRef.current.offsetLeft);
+    setScrollLeft(trackRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !trackRef.current) return;
+    e.preventDefault();
+    wasDraggingRef.current = true;
+    const x = e.pageX - trackRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    trackRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    startResumeTimer();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!trackRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    clearResumeTimer();
+    wasDraggingRef.current = false;
+    setStartX(e.touches[0].pageX - trackRef.current.offsetLeft);
+    setScrollLeft(trackRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !trackRef.current) return;
+    wasDraggingRef.current = true;
+    const x = e.touches[0].pageX - trackRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    trackRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    startResumeTimer();
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (wasDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    wasDraggingRef.current = false;
+  };
+
+  useEffect(() => {
+    return () => {
+      clearResumeTimer();
+    };
+  }, []);
+
+  return (
+    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes testiScroll {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-200%); }
+          100% { transform: translateX(-50%); }
         }
         .testi-track {
           animation: testiScroll 20s linear infinite;
         }
-        .testi-track:hover {
+        .testi-track.paused {
           animation-play-state: paused;
         }
-      `}}></style>
+        .testi-container {
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          cursor: grab;
+        }
+        .testi-container::-webkit-scrollbar {
+          display: none;
+        }
+        .testi-container:active {
+          cursor: grabbing;
+        }
+      `}} />
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-10 md:mb-16 reveal-down">
           <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
@@ -613,10 +721,29 @@ function Testimonials() {
         </div>
       </div>
 
-      <div className="overflow-hidden">
-        <div className="testi-track flex gap-4 md:gap-6">
+      <div 
+        className="testi-container overflow-hidden"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={handleClick}
+      >
+        <div 
+          ref={trackRef}
+          className={`testi-track flex gap-4 md:gap-6 ${isPaused ? 'paused' : ''}`}
+          style={{ width: 'max-content' }}
+        >
           {allTestimonials.map((t, i) => (
-            <div key={i} className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30">
+            <div 
+              key={i} 
+              className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <div className="flex gap-1 mb-3 md:mb-4">
                 {Array.from({ length: t.stars }).map((_, j) => (
                   <Star key={j} size={13} className="text-red fill-red" />
