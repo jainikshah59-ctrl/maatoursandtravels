@@ -27,28 +27,25 @@ function useReveal() {
         entries.forEach((e) => {
           if (e.isIntersecting) {
             e.target.classList.add('visible');
-            // Re-observe for scroll up/down animations
-            // Don't unobserve so it can animate again when scrolling back
-          } else {
-            e.target.classList.remove('visible');
+            observer.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
     );
-    document.querySelectorAll('.reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale').forEach((el) => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 }
 
 /* ─── Custom Cursor ─── */
 function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef(null);
+  const ringRef = useRef(null);
   const pos = useRef({ x: 0, y: 0, rx: 0, ry: 0 });
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
+    const onMove = (e) => {
       pos.current.x = e.clientX;
       pos.current.y = e.clientY;
       if (cursorRef.current) {
@@ -67,6 +64,18 @@ function CustomCursor() {
     };
     window.addEventListener('mousemove', onMove);
     const raf = requestAnimationFrame(animate);
+    const onEnter = () => {
+      if (cursorRef.current) cursorRef.current.style.transform = 'scale(2.5)';
+      if (ringRef.current) ringRef.current.style.transform = 'scale(1.5)';
+    };
+    const onLeave = () => {
+      if (cursorRef.current) cursorRef.current.style.transform = 'scale(1)';
+      if (ringRef.current) ringRef.current.style.transform = 'scale(1)';
+    };
+    document.querySelectorAll('a, button, .dest-card, .pkg-card, .service-card, .testi-card').forEach((el) => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
     return () => {
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(raf);
@@ -109,7 +118,7 @@ function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between">
         <a href="#home" className="flex items-center gap-2 md:gap-3">
           <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
-          <span className="font-playfair text-base md:text-xl text-white tracking-wide">
+          <span className="hidden sm:block font-playfair text-lg md:text-xl text-white tracking-wide">
             Maa <span className="text-red">Travels</span>
           </span>
         </a>
@@ -139,7 +148,7 @@ function Navbar() {
 
         {/* Mobile menu button */}
         <button
-          className="lg:hidden text-white p-2"
+          className="lg:hidden text-white p-2 touch-manipulation"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -208,9 +217,9 @@ function Hero() {
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 pt-20 md:pt-24">
         <div className="max-w-[800px]">
-          <div className="mb-5 md:mb-8 opacity-0 animate-fadeSlideUp text-[10px] md:text-[11px]">
-            <span className="w-1.5 h-1.5 bg-red rounded-full pulse-dot mr-2" />
-            Bhuj · Gujarat · Est. 2010+
+          <div className="hero-badge mb-5 md:mb-8 opacity-0 animate-fadeSlideUp text-[10px] md:text-[11px]">
+            <span className="w-1.5 h-1.5 bg-red rounded-full pulse-dot" />
+            Rajkot · Gujarat · Est. 2010+
           </div>
 
           <h1 className="font-playfair text-[clamp(32px,8vw,84px)] font-normal leading-[1.05] tracking-tight text-white mb-4 md:mb-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.2s' }}>
@@ -239,8 +248,14 @@ function Hero() {
         </div>
       </div>
 
-      {/* Stats - positioned at bottom right */}
-      <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
+      <div className="absolute bottom-6 md:bottom-10 left-4 md:left-12 z-10 flex items-center gap-3 md:gap-4 text-[10px] md:text-[11px] tracking-[2px] uppercase text-white/50 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '1s' }}>
+        <div className="w-[40px] md:w-[60px] h-[1px] bg-gradient-to-r from-red to-transparent relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-red-light" style={{ animation: 'scrollLine 2s linear infinite' }} />
+        </div>
+        Scroll to explore
+      </div>
+
+      <div className="absolute right-4 md:right-12 bottom-6 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
         {[
           { num: '10+', label: 'Years of Trust' },
           { num: '5K+', label: 'Happy Travellers' },
@@ -251,14 +266,6 @@ function Hero() {
             <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-0.5 md:mt-1">{stat.label}</div>
           </div>
         ))}
-      </div>
-
-      {/* Scroll to explore - below stats on mobile, left side on desktop */}
-      <div className="absolute bottom-4 md:bottom-10 left-4 md:left-12 z-10 flex items-center gap-3 md:gap-4 text-[10px] md:text-[11px] tracking-[2px] uppercase text-white/50 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '1s' }}>
-        <div className="w-[40px] md:w-[60px] h-[1px] bg-gradient-to-r from-red to-transparent relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-red-light" style={{ animation: 'scrollLine 2s linear infinite' }} />
-        </div>
-        Scroll to explore
       </div>
     </section>
   );
@@ -316,7 +323,7 @@ function Destinations() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
-          <div className="dest-card sm:col-span-2 lg:col-span-6 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up">
+          <div className="dest-card sm:col-span-2 lg:col-span-6 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal">
             <img src={destinations[0].img} alt={destinations[0].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
@@ -329,7 +336,7 @@ function Destinations() {
             </div>
           </div>
 
-          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-1">
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal reveal-delay-1">
             <img src={destinations[1].img} alt={destinations[1].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
@@ -342,7 +349,7 @@ function Destinations() {
             </div>
           </div>
 
-          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-2">
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal reveal-delay-2">
             <img src={destinations[2].img} alt={destinations[2].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
@@ -356,7 +363,7 @@ function Destinations() {
           </div>
 
           {destinations.slice(3).map((dest, i) => (
-            <div key={dest.name} className={`dest-card sm:col-span-1 lg:col-span-4 h-[240px] md:h-[320px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-${i + 1}`}>
+            <div key={dest.name} className={`dest-card sm:col-span-1 lg:col-span-4 h-[240px] md:h-[320px] relative overflow-hidden rounded cursor-pointer group card-3d reveal reveal-delay-${i + 1}`}>
               <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
@@ -389,14 +396,14 @@ function Services() {
   return (
     <section id="services" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
       <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-12 md:mb-16 reveal-down">
+        <div className="text-center mb-12 md:mb-16 reveal">
           <div className="section-label mb-3 md:mb-4">What We Offer</div>
           <h2 className="section-title text-[clamp(28px,5vw,56px)]">
             Travel Services<br className="md:hidden" /> Crafted for <em>Comfort</em>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-white/[0.08] rounded-lg overflow-hidden reveal-scale">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-white/[0.08] rounded-lg overflow-hidden reveal">
           {services.map((service, i) => (
             <div
               key={service.title}
@@ -437,7 +444,7 @@ function About() {
     <section id="about" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-center">
-          <div className="relative order-2 lg:order-1 reveal-left">
+          <div className="relative reveal order-2 lg:order-1">
             <div className="w-full aspect-[4/5] relative rounded overflow-hidden max-w-[500px] mx-auto lg:mx-0">
               <img src="/images/about_journey.png" alt="Family journey" className="w-full h-full object-cover" />
             </div>
@@ -447,13 +454,13 @@ function About() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 reveal-right">
+          <div className="reveal reveal-delay-2 order-1 lg:order-2">
             <div className="section-label mb-3 md:mb-4">Our Story</div>
             <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
               Your Most Trusted<br /><em>Travel Partner</em><br />in Gujarat
             </h2>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-4 md:mb-5">
-              For over a decade, Maa Tour & Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
+              For over a decade, Maa Tour & Travels has been the most respected name in travel across Rajkot, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
             </p>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-6 md:mb-8">
               Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service — because your dream holiday deserves nothing less than perfection.
@@ -495,7 +502,7 @@ function Packages() {
     {
       img: '/images/rajasthan.png',
       dur: '5 Days / 4 Nights',
-      route: 'Bhuj → Jaipur → Jaisalmer → Udaipur',
+      route: 'Rajkot → Jaipur → Jaisalmer → Udaipur',
       name: 'Rajasthan\nRoyal Heritage',
       pax: '2–15 Pax',
       vehicle: 'Luxury Van',
@@ -536,7 +543,7 @@ function Packages() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {packages.map((pkg, i) => (
-            <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal-up reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
+            <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
               {pkg.featured && (
                 <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10 bg-red text-black text-[8px] md:text-[9px] tracking-[2px] uppercase px-2.5 md:px-3 py-0.5 md:py-1 rounded-sm">
                   Popular
@@ -580,12 +587,12 @@ function Packages() {
 /* ─── Testimonials ─── */
 function Testimonials() {
   const testimonials = [
-    { stars: 5, text: '"Best trip destination knowledge, too much cooperative and honest, excellent service, driving skill excellent. Highly recommend to everyone."', name: 'Rajesh Mehta', loc: 'Bhuj, Gujarat', avatar: 'R' },
-    { stars: 5, text: '"Best service and best travel planner in Bhuj — all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
+    { stars: 5, text: '"Best trip destination knowledge, too much cooperative and honest, excellent service, driving skill excellent. Highly recommend to everyone."', name: 'Rajesh Mehta', loc: 'Rajkot, Gujarat', avatar: 'R' },
+    { stars: 5, text: '"Best service and best travel planner in Rajkot — all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
     { stars: 5, text: '"Very good service, enjoyed my trip a lot, cars are also good and completely satisfied with the driver. They deserve to be at the top."', name: 'Amit Patel', loc: 'Surat, Gujarat', avatar: 'A' },
     { stars: 5, text: '"Economical cost, friendly staff and drivers, affordable trip for family. Comfortable and suitable for any occasion. Absolutely loved every moment!"', name: 'Sunita Joshi', loc: 'Vadodara, Gujarat', avatar: 'S' },
     { stars: 5, text: '"Our Saurashtra darshan was perfectly planned. The driver was so knowledgeable about local temples and traditions. Truly a spiritual experience."', name: 'Deepak Trivedi', loc: 'Mumbai, Maharashtra', avatar: 'D' },
-    { stars: 5, text: '"They arranged our company\'s annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
+    { stars: 5, text: '"They arranged our company\'s annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Rajkot, Gujarat', avatar: 'K' },
     { stars: 5, text: '"The Kutch trip was magical. Sanitized car, professional driver, great hotel recommendations. Maa Tours truly made it once in a lifetime."', name: 'Mohan Desai', loc: 'Bhavnagar, Gujarat', avatar: 'M' },
     { stars: 5, text: '"Airport pickup was seamless, driver was on time and very polite. Baggage transfer was smooth. Will use Maa Tours for all my future travel needs."', name: 'Neha Chauhan', loc: 'Junagadh, Gujarat', avatar: 'N' },
   ];
@@ -595,7 +602,7 @@ function Testimonials() {
   return (
     <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
       <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-10 md:mb-16 reveal-down">
+        <div className="text-center mb-10 md:mb-16 reveal">
           <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
           <h2 className="section-title text-[clamp(28px,5vw,56px)]">
             Memories Crafted,<br /><em>Trust Earned</em>
@@ -634,7 +641,7 @@ function Testimonials() {
 function Contact() {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
   };
@@ -643,7 +650,7 @@ function Contact() {
     { icon: <Phone size={16} />, label: 'Call Us', val: '+91 9876543210' },
     { icon: <MessageCircle size={16} />, label: 'WhatsApp', val: '+91 9876543210' },
     { icon: <Mail size={16} />, label: 'Email', val: 'info@maatourandtravels.in' },
-    { icon: <MapPinned size={16} />, label: 'Office', val: 'Bhuj, Gujarat, India' },
+    { icon: <MapPinned size={16} />, label: 'Office', val: 'Rajkot, Gujarat, India' },
   ];
 
   return (
@@ -652,7 +659,7 @@ function Contact() {
 
       <div className="max-w-[1400px] mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20">
-          <div className="reveal-left">
+          <div className="reveal">
             <div className="section-label mb-3 md:mb-4">Get In Touch</div>
             <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
               Begin Your<br /><em>Journey</em><br />With Us Today
@@ -676,7 +683,7 @@ function Contact() {
             </div>
           </div>
 
-          <div className="reveal-right">
+          <div className="reveal reveal-delay-2">
             <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
               <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-6 md:mb-8">Plan Your Journey</h3>
 
@@ -816,7 +823,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center pt-6 md:pt-8 border-t border-white/[0.08] text-[11px] md:text-[12px] text-white/50 gap-2 md:gap-4">
           <div>© 2025 Maa Tour & Travels. All rights reserved.</div>
           <div>
-            Designed with <span className="text-red">♥</span> in Bhuj, Gujarat | <a href="#" className="text-red-light hover:underline">maatourandtravels.in</a>
+            Designed with <span className="text-red">♥</span> in Rajkot, Gujarat | <a href="#" className="text-red-light hover:underline">maatourandtravels.in</a>
           </div>
         </div>
       </div>
