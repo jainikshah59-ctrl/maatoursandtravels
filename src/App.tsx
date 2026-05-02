@@ -181,11 +181,14 @@ function Hero() {
   return (
     <section id="home" className="relative min-h-[100dvh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
-        <img
-          src="/images/hero_travel.png"
-          alt="Mountain road journey"
-          className="w-full h-full object-cover"
-        />
+        <video
+  src="/videos/hero_travel.mp4"
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full h-full object-cover"
+/>
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
       </div>
