@@ -5,6 +5,17 @@ import {
   ArrowRight, Star, Menu, X, ChevronRight, Users, Bus
 } from 'lucide-react';
 
+/* ─── Testimonial Animation Speed ─── */
+const testimonialStyles = `
+  @keyframes testiScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .testi-track {
+    animation: testiScroll 20s linear infinite;
+  }
+`;
+
 /* ─── Scroll Progress Hook ─── */
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -243,7 +254,7 @@ function Hero() {
       </div>
 
       {/* Stats - positioned at bottom right */}
-      <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
+      <div className="absolute right-4 md:right-12 bottom-28 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
         {[
           { num: '10+', label: 'Years of Trust' },
           { num: '5K+', label: 'Happy Travellers' },
@@ -607,7 +618,7 @@ function Testimonials() {
       </div>
 
       <div className="overflow-hidden">
-        <div className="testi-track flex gap-4 md:gap-6">
+        <div className="testi-track flex gap-4 md:gap-6" style={{ animationDuration: '20s' }}>
           {allTestimonials.map((t, i) => (
             <div key={i} className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30">
               <div className="flex gap-1 mb-3 md:mb-4">
@@ -635,16 +646,37 @@ function Testimonials() {
 
 /* ─── Contact ─── */
 function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    pickup: '',
+    drop: '',
+    datetime: ''
+  });
+
+  const cities = [
+    'Ahmedabad', 'Vadodara', 'Rajkot', 'Jamnagar', 'Surat', 'Porbandar', 'Junagadh', 'Morbi', 'Anand',
+    'Patan', 'Bharuch', 'Bhavnagar', 'Mehsana', 'Navsari', 'Bhuj', 'Gandhidham', 'Gondal', 'Gandhinagar',
+    'Godhra', 'Palanpur', 'Nadiad', 'Valsad', 'Deesa', 'Kheda', 'Amreli', 'Botad', 'Vapi', 'Veraval',
+    'Kalol', 'Jetpur', 'Dudhrej', 'Chhota Udepur', 'Dahod', 'Mandavi', 'Vankaner', 'Idar', 'Lunawada',
+    'Khambhariya', 'Himatnagar', 'Modasa', 'Vyara', 'Rajpipla', 'Dhandhuka', 'Ankleshwar', 'Padra',
+    'Bhachau', 'Jambusar', 'Ranavav', 'Dwarka', 'Okha', 'Saputara', 'Somnath', 'Una', 'Diu', 'Daman',
+    'Viramgam', 'Harvard', 'Matamadh', 'Mundra', 'Bhanvad', 'Sasangir', 'Udaipur', 'Chittorgarh',
+    'Nathdwara', 'Abu', 'Sirohi', 'Jodhpur', 'Ajmer', 'Kumbhalgarh', 'Pindwada', 'Jaalol', 'Radhanpur'
+  ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    const msg = `Hello Maa Travels! I would like to book a journey.%0A%0A*Name:* ${formData.name}%0A*Pickup:* ${formData.pickup}%0A*Drop:* ${formData.drop}%0A*Date & Time:* ${formData.datetime}`;
+    window.open(`https://wa.me/919558050710?text=${msg}`, '_blank');
   };
 
   const contactItems = [
-    { icon: <Phone size={16} />, label: 'Call Us', val: '+91 9876543210' },
-    { icon: <MessageCircle size={16} />, label: 'WhatsApp', val: '+91 9876543210' },
+    { icon: <Phone size={16} />, label: 'Call Us', val: '+91 9558050710' },
+    { icon: <MessageCircle size={16} />, label: 'WhatsApp', val: '+91 9558050710' },
     { icon: <Mail size={16} />, label: 'Email', val: 'info@maatourandtravels.in' },
     { icon: <MapPinned size={16} />, label: 'Office', val: 'Bhuj, Gujarat, India' },
   ];
@@ -683,69 +715,67 @@ function Contact() {
             <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
               <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-6 md:mb-8">Plan Your Journey</h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+              <div className="flex flex-col gap-3 md:gap-4 mb-5 md:mb-6">
                 <div className="flex flex-col gap-2">
                   <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Your Name</label>
-                  <input type="text" placeholder="Full name" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" required />
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Full name" 
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                    required 
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Phone Number</label>
-                  <input type="tel" placeholder="+91 XXXXX XXXXX" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" required />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Destination</label>
-                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
-                    <option value="">Select destination</option>
-                    <option>Saurashtra Darshan</option>
-                    <option>Rann of Kutch</option>
-                    <option>Goa</option>
-                    <option>Himachal Pradesh</option>
-                    <option>Rajasthan</option>
-                    <option>Char Dham Yatra</option>
-                    <option>Gujarat Tour</option>
-                    <option>Custom Package</option>
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Pickup Location</label>
+                  <select 
+                    name="pickup"
+                    value={formData.pickup}
+                    onChange={handleChange}
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-black text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all"
+                    required
+                  >
+                    <option value="">Select pickup city</option>
+                    {cities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Travel Date</label>
-                  <input type="date" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Travellers</label>
-                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
-                    <option>1–2 People</option>
-                    <option>3–5 People</option>
-                    <option>6–10 People</option>
-                    <option>10–20 People</option>
-                    <option>Corporate / Large Group</option>
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Drop Location</label>
+                  <select 
+                    name="drop"
+                    value={formData.drop}
+                    onChange={handleChange}
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-black text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all"
+                    required
+                  >
+                    <option value="">Select drop city</option>
+                    {cities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Budget Range</label>
-                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
-                    <option>Economy (₹5K–15K)</option>
-                    <option>Standard (₹15K–30K)</option>
-                    <option>Premium (₹30K–60K)</option>
-                    <option>Luxury (₹60K+)</option>
-                  </select>
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date & Time</label>
+                  <input 
+                    type="datetime-local" 
+                    name="datetime"
+                    value={formData.datetime}
+                    onChange={handleChange}
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                    required 
+                  />
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-2 mb-5 md:mb-6">
-                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Special Requirements</label>
-                <textarea placeholder="Tell us about your dream trip..." rows={3} className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all resize-none" />
               </div>
 
               <button
                 type="submit"
-                className={`w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 ${
-                  submitted
-                    ? 'bg-green-600 text-white'
-                    : 'btn-3d bg-red text-black hover:bg-red-light'
-                }`}
-                disabled={submitted}
+                className="w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 btn-3d bg-red text-black hover:bg-red-light"
               >
-                {submitted ? "✓ Request Sent! We'll call you soon." : 'Send Booking Enquiry'}
+                Send Booking Enquiry
               </button>
             </form>
           </div>
@@ -754,7 +784,6 @@ function Contact() {
     </section>
   );
 }
-
 /* ─── Footer ─── */
 function Footer() {
   return (
@@ -831,7 +860,7 @@ function Footer() {
 function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/919876543210"
+      href="https://wa.me/919558050710"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 md:bottom-8 right-4 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-[#25D366] rounded-full flex items-center justify-center whatsapp-pulse hover:scale-110 transition-transform duration-300"
