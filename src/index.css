@@ -1,0 +1,381 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --red: #C8102E;
+    --red-light: #E63950;
+    --red-pale: rgba(200, 16, 46, 0.08);
+    --black: #000000;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 350 85% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 350 85% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 350 85% 42%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 350 85% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 0 0% 12%;
+    --sidebar-ring: 350 85% 42%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-black text-white antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ─── Font Classes ─── */
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ─── Red Color Utilities ─── */
+.text-red {
+  color: var(--red);
+}
+
+.text-red-light {
+  color: var(--red-light);
+}
+
+.bg-red {
+  background-color: var(--red);
+}
+
+.bg-red-pale {
+  background-color: var(--red-pale);
+}
+
+.border-red {
+  border-color: var(--red);
+}
+
+/* ─── Section Label ─── */
+.section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red-light);
+  position: relative;
+  display: inline-block;
+  padding-left: 24px;
+}
+
+.section-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 1px;
+  background: var(--red);
+}
+
+/* ─── Section Title ─── */
+.section-title {
+  font-family: 'Playfair Display', serif;
+  line-height: 1.1;
+  color: white;
+}
+
+.section-title em {
+  color: var(--red);
+  font-style: normal;
+}
+
+/* ─── Glass Card ─── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Card 3D Hover ─── */
+.card-3d {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateZ(10px);
+}
+
+/* ─── Button 3D ─── */
+.btn-3d-wrapper {
+  display: inline-block;
+  perspective: 600px;
+}
+
+.btn-3d {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
+}
+
+.btn-3d:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(200, 16, 46, 0.5);
+}
+
+/* ─── Hero Animations ─── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes scrollLine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.3);
+  }
+}
+
+.animate-fadeSlideUp {
+  animation: fadeSlideUp 0.8s ease forwards;
+}
+
+.animate-orbFloat {
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ─── Marquee Animation ─── */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marqueeScroll 20s linear infinite;
+}
+
+/* ─── Testimonial Track Animation ─── */
+@keyframes testiScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.testi-track {
+  animation: testiScroll 18s linear infinite;
+}
+
+.testi-track:hover {
+  animation-play-state: paused;
+}
+
+/* ─── WhatsApp Pulse ─── */
+@keyframes whatsappPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+.whatsapp-pulse {
+  animation: whatsappPulse 2s ease-in-out infinite;
+}
+
+/* ─── Scroll Reveal Animations ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll up animation - elements fade in from below when scrolling up */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1), transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll down animation - elements fade in from above when scrolling down */
+.reveal-down {
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1), transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-down.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reveal from left */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Reveal from right */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Reveal scale - grows from smaller */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1), transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Stagger delays for children */
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ─── Responsive ─── */
+@media (max-width: 767px) {
+  .section-title {
+    line-height: 1.15;
+  }
+  
+  .reveal,
+  .reveal-up,
+  .reveal-down,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    transform: translateY(30px);
+    transition-duration: 0.6s;
+  }
+  
+  .reveal-left.visible,
+  .reveal-right.visible {
+    transform: translateX(0);
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .reveal,
+  .reveal-up,
+  .reveal-down,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+}

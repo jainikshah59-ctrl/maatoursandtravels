@@ -1,0 +1,871 @@
+import { useState, useEffect, useRef } from 'react';
+import {
+  MapPin, Car, Plane, Hotel, Church, Building2,
+  Phone, MessageCircle, Mail, MapPinned, Check,
+  ArrowRight, Star, Menu, X, ChevronRight, Users, Bus
+} from 'lucide-react';
+
+/* ─── Scroll Progress Hook ─── */
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      setProgress(Math.min(100, Math.max(0, pct)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return progress;
+}
+
+/* ─── Scroll Reveal Hook ─── */
+function useReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            // Re-observe for scroll up/down animations
+            // Don't unobserve so it can animate again when scrolling back
+          } else {
+            e.target.classList.remove('visible');
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
+/* ─── Custom Cursor ─── */
+function CustomCursor() {
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const pos = useRef({ x: 0, y: 0, rx: 0, ry: 0 });
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      pos.current.x = e.clientX;
+      pos.current.y = e.clientY;
+      if (cursorRef.current) {
+        cursorRef.current.style.left = (e.clientX - 6) + 'px';
+        cursorRef.current.style.top = (e.clientY - 6) + 'px';
+      }
+    };
+    const animate = () => {
+      pos.current.rx += (pos.current.x - pos.current.rx) * 0.12;
+      pos.current.ry += (pos.current.y - pos.current.ry) * 0.12;
+      if (ringRef.current) {
+        ringRef.current.style.left = (pos.current.rx - 20) + 'px';
+        ringRef.current.style.top = (pos.current.ry - 20) + 'px';
+      }
+      requestAnimationFrame(animate);
+    };
+    window.addEventListener('mousemove', onMove);
+    const raf = requestAnimationFrame(animate);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={cursorRef} className="fixed w-3 h-3 bg-red rounded-full pointer-events-none z-[9999] transition-transform duration-150 mix-blend-difference hidden md:block" />
+      <div ref={ringRef} className="fixed w-10 h-10 border border-red-light rounded-full pointer-events-none z-[9998] transition-all duration-100 opacity-50 hidden md:block" />
+    </>
+  );
+}
+
+/* ─── Navigation ─── */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const navLinks = [
+    { label: 'Destinations', href: '#destinations' },
+    { label: 'Services', href: '#services' },
+    { label: 'Packages', href: '#packages' },
+    { label: 'About', href: '#about' },
+    { label: 'Contact', href: '#contact' },
+  ];
+
+  return (
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? 'bg-black/90 backdrop-blur-2xl border-b border-white/[0.08] py-2' : 'py-3 md:py-5'
+      }`}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between">
+        <a href="#home" className="flex items-center gap-2 md:gap-3">
+          <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+          <span className="font-playfair text-base md:text-xl text-white tracking-wide">
+            Maa <span className="text-red">Travels</span>
+          </span>
+        </a>
+
+        {/* Desktop Nav */}
+        <ul className="hidden lg:flex items-center gap-7 xl:gap-9">
+          {navLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                className="relative text-[11px] tracking-[2px] uppercase text-white/60 hover:text-red-light transition-colors duration-300 group"
+              >
+                {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-red transition-all duration-300 group-hover:w-full" />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden lg:block">
+          <a href="#contact" className="btn-3d-wrapper">
+            <span className="btn-3d inline-block bg-red text-white px-5 md:px-6 py-2.5 md:py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm cursor-pointer">
+              Book Now
+            </span>
+          </a>
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="lg:hidden text-white p-2"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Nav */}
+      {menuOpen && (
+        <div className="lg:hidden bg-black/95 backdrop-blur-xl border-t border-white/[0.08] px-6 py-6 max-h-[80vh] overflow-y-auto">
+          <ul className="flex flex-col gap-5">
+            {navLinks.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm tracking-[2px] uppercase text-white/70 hover:text-red-light transition-colors block py-2"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            <li className="pt-2">
+              <a href="#contact" onClick={() => setMenuOpen(false)} className="btn-3d-wrapper inline-block">
+                <span className="btn-3d inline-block bg-red text-white px-6 py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm">
+                  Book Now
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      )}
+    </nav>
+  );
+}
+
+/* ─── Hero ─── */
+function Hero() {
+  return (
+    <section id="home" className="relative min-h-[100dvh] flex items-center overflow-hidden">
+      <div className="absolute inset-0">
+        <img
+          src="/images/hero_travel.png"
+          alt="Mountain road journey"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-red/5 blur-[80px] md:blur-[100px] -top-12 -right-12 md:-top-24 md:-right-24 animate-orbFloat" />
+        <div className="absolute w-[200px] h-[200px] md:w-[400px] md:h-[400px] rounded-full bg-red/3 blur-[60px] md:blur-[80px] bottom-0 -left-12 animate-orbFloat" style={{ animationDelay: '-3s' }} />
+        <div className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] rounded-full bg-white/3 blur-[40px] md:blur-[60px] top-1/3 left-1/3 animate-orbFloat" style={{ animationDelay: '-5s' }} />
+      </div>
+
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 70% 70% at 60% 50%, black 30%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 60% 50%, black 30%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 pt-20 md:pt-24">
+        <div className="max-w-[800px]">
+          <div className="mb-5 md:mb-8 opacity-0 animate-fadeSlideUp text-[10px] md:text-[11px]">
+            <span className="w-1.5 h-1.5 bg-red rounded-full pulse-dot mr-2" />
+            Bhuj · Gujarat · Est. 2010+
+          </div>
+
+          <h1 className="font-playfair text-[clamp(32px,8vw,84px)] font-normal leading-[1.05] tracking-tight text-white mb-4 md:mb-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.2s' }}>
+            Journey Beyond<br />
+            <em className="text-red not-italic">Every Horizon</em>
+            <span className="block ml-0 md:ml-14 mt-1">You Dream</span>
+          </h1>
+
+          <p className="text-[13px] md:text-[15px] text-white/60 leading-[1.8] max-w-[480px] mb-8 md:mb-10 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.4s' }}>
+            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal — we craft journeys that become memories for a lifetime.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.6s' }}>
+            <a href="#packages" className="btn-3d-wrapper">
+              <span className="btn-3d inline-block bg-red text-white px-6 md:px-8 py-3.5 md:py-4 text-[11px] md:text-[12px] tracking-[2px] uppercase font-inter font-medium rounded-sm cursor-pointer">
+                Explore Packages
+              </span>
+            </a>
+            <a href="#destinations" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase transition-all duration-300 hover:gap-5">
+              <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
+                <ArrowRight size={16} className="text-white" />
+              </span>
+              View Destinations
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats - positioned at bottom right */}
+      <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
+        {[
+          { num: '10+', label: 'Years of Trust' },
+          { num: '5K+', label: 'Happy Travellers' },
+          { num: '50+', label: 'Destinations' },
+        ].map((stat) => (
+          <div key={stat.label} className="text-center md:text-right">
+            <div className="font-playfair text-[28px] md:text-[42px] font-light text-red leading-none">{stat.num}</div>
+            <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-0.5 md:mt-1">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Scroll to explore - below stats on mobile, left side on desktop */}
+      <div className="absolute bottom-4 md:bottom-10 left-4 md:left-12 z-10 flex items-center gap-3 md:gap-4 text-[10px] md:text-[11px] tracking-[2px] uppercase text-white/50 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '1s' }}>
+        <div className="w-[40px] md:w-[60px] h-[1px] bg-gradient-to-r from-red to-transparent relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-red-light" style={{ animation: 'scrollLine 2s linear infinite' }} />
+        </div>
+        Scroll to explore
+      </div>
+    </section>
+  );
+}
+
+/* ─── Marquee ─── */
+function Marquee() {
+  const items = [
+    'Saurashtra Darshan', 'Kutch Desert Festival', 'Goa Beach Escape',
+    'Himachal Snow Retreat', 'Char Dham Yatra', 'Rajasthan Royal Tour',
+    'Gujarat Heritage Circuit', 'Corporate Tours & Events',
+  ];
+
+  return (
+    <div className="bg-red-pale border-y border-red/20 py-4 md:py-5 overflow-hidden whitespace-nowrap">
+      <div className="marquee-track inline-flex">
+        {[...items, ...items].map((item, i) => (
+          <span key={i} className="font-playfair text-[11px] md:text-[13px] tracking-[3px] uppercase text-red-light px-6 md:px-10">
+            {item}
+            <span className="text-red ml-6 md:ml-10">✦</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Destinations ─── */
+function Destinations() {
+  const destinations = [
+    { name: 'Saurashtra\nDarshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.png' },
+    { name: 'Rann of\nKutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.png' },
+    { name: 'Goa\nParadise', tag: 'Beach & Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
+    { name: 'Himachal\nPradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.png' },
+    { name: 'Rajasthan\nRoyale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.png' },
+    { name: 'Gujarat\nSplendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.png' },
+  ];
+
+  return (
+    <section id="destinations" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-14 reveal">
+          <div>
+            <div className="section-label mb-3 md:mb-4">Our Destinations</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+              India's Most <em>Breathtaking</em><br className="hidden md:block" /> Corners Await You
+            </h2>
+          </div>
+          <a href="#packages" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
+            <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
+              <ArrowRight size={16} />
+            </span>
+            All Destinations
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
+          <div className="dest-card sm:col-span-2 lg:col-span-6 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up">
+            <img src={destinations[0].img} alt={destinations[0].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[0].tag}</span>
+              <h3 className="font-playfair text-[22px] md:text-[clamp(22px,2.5vw,32px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[0].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[0].desc}</p>
+            </div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
+            </div>
+          </div>
+
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-1">
+            <img src={destinations[1].img} alt={destinations[1].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[1].tag}</span>
+              <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[1].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[1].desc}</p>
+            </div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
+            </div>
+          </div>
+
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-2">
+            <img src={destinations[2].img} alt={destinations[2].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[2].tag}</span>
+              <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[2].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[2].desc}</p>
+            </div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
+            </div>
+          </div>
+
+          {destinations.slice(3).map((dest, i) => (
+            <div key={dest.name} className={`dest-card sm:col-span-1 lg:col-span-4 h-[240px] md:h-[320px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-${i + 1}`}>
+              <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{dest.tag}</span>
+                <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{dest.name}</h3>
+                <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{dest.desc}</p>
+              </div>
+              <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+                <ArrowRight size={14} className="text-white" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Services ─── */
+function Services() {
+  const services = [
+    { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes — designed around your dreams.', link: '#packages' },
+    { icon: <Car size={22} />, title: 'Premium Taxi & Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
+    { icon: <Plane size={22} />, title: 'Flight Ticket Booking', desc: 'Lowest fares on domestic and international flights. Special rates and exclusive deals you won\'t find anywhere else.', link: '#contact' },
+    { icon: <Hotel size={22} />, title: 'Hotel Reservations', desc: 'Handpicked accommodations from budget-friendly stays to five-star luxury resorts. Verified, reliable, perfectly located.', link: '#contact' },
+    { icon: <Church size={22} />, title: 'Spiritual & Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond — reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
+    { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#contact' },
+  ];
+
+  return (
+    <section id="services" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="text-center mb-12 md:mb-16 reveal-down">
+          <div className="section-label mb-3 md:mb-4">What We Offer</div>
+          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+            Travel Services<br className="md:hidden" /> Crafted for <em>Comfort</em>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-white/[0.08] rounded-lg overflow-hidden reveal-scale">
+          {services.map((service, i) => (
+            <div
+              key={service.title}
+              className={`service-card bg-[#0a0a0a] p-6 md:p-10 lg:p-12 relative overflow-hidden group transition-all duration-400 hover:bg-[#111] ${
+                i < services.length - 1 ? 'border-b border-white/[0.08]' : ''
+              } ${i % 2 === 0 && i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-white/[0.03] border border-white/[0.08] rounded flex items-center justify-center mb-5 md:mb-7 text-white/70 group-hover:text-red-light group-hover:border-red/30 transition-all duration-300">
+                  {service.icon}
+                </div>
+                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal text-white mb-2 md:mb-3">{service.title}</h3>
+                <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.8]">{service.desc}</p>
+                <a href={service.link} className="inline-flex items-center gap-2 mt-4 md:mt-6 text-[10px] md:text-[11px] tracking-[2px] uppercase text-red hover:gap-4 transition-all duration-300">
+                  Explore <ChevronRight size={14} />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── About ─── */
+function About() {
+  const features = [
+    { strong: '10+ Years', text: 'of industry expertise & local knowledge' },
+    { strong: 'Safety First', text: '— sanitized vehicles, trained drivers, regular checks' },
+    { strong: 'Transparent Pricing', text: '— no hidden charges, ever' },
+    { strong: 'Government & Corporate', text: 'approved travel contracts' },
+    { strong: '24/7 Support', text: '— your ride is always just a call away' },
+  ];
+
+  return (
+    <section id="about" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-center">
+          <div className="relative order-2 lg:order-1 reveal-left">
+            <div className="w-full aspect-[4/5] relative rounded overflow-hidden max-w-[500px] mx-auto lg:mx-0">
+              <img src="/images/about_journey.png" alt="Family journey" className="w-full h-full object-cover" />
+            </div>
+            <div className="absolute -bottom-6 md:-bottom-8 -right-2 md:-right-4 lg:-right-8 glass-card rounded-lg p-4 md:p-6 lg:p-7 min-w-[140px] md:min-w-[180px]">
+              <div className="font-playfair text-[32px] md:text-[48px] font-light text-red leading-none">10+</div>
+              <div className="text-[10px] md:text-[11px] text-white/50 tracking-[1px] mt-1 md:mt-2">Years of Excellence</div>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 reveal-right">
+            <div className="section-label mb-3 md:mb-4">Our Story</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
+              Your Most Trusted<br /><em>Travel Partner</em><br />in Gujarat
+            </h2>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-4 md:mb-5">
+              For over a decade, Maa Tour & Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
+            </p>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-6 md:mb-8">
+              Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service — because your dream holiday deserves nothing less than perfection.
+            </p>
+
+            <div className="flex flex-col gap-3 md:gap-4">
+              {features.map((f) => (
+                <div key={f.strong} className="flex items-start md:items-center gap-3 md:gap-4 p-3 md:p-4 bg-white/[0.03] border border-white/[0.08] rounded transition-all duration-300 hover:bg-white/[0.06] hover:border-red/30">
+                  <div className="w-6 h-6 md:w-7 md:h-7 min-w-[24px] md:min-w-[28px] rounded-full bg-red-pale border border-red/30 flex items-center justify-center mt-0.5 md:mt-0">
+                    <Check size={12} className="text-red" />
+                  </div>
+                  <span className="text-[12px] md:text-[13px] text-white/50 leading-[1.6]">
+                    <strong className="text-white font-medium">{f.strong}</strong> {f.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Packages ─── */
+function Packages() {
+  const packages = [
+    {
+      img: '/images/himachal.png',
+      dur: '4 Days / 3 Nights',
+      route: 'Haridwar → Kedarnath → Return',
+      name: 'Char Dham\nYatra Pilgrimage',
+      pax: '2–20 Pax',
+      vehicle: 'A/C Vehicle',
+      hotel: 'Hotel Incl.',
+      price: '₹12,000',
+      featured: false,
+    },
+    {
+      img: '/images/rajasthan.png',
+      dur: '5 Days / 4 Nights',
+      route: 'Bhuj → Jaipur → Jaisalmer → Udaipur',
+      name: 'Rajasthan\nRoyal Heritage',
+      pax: '2–15 Pax',
+      vehicle: 'Luxury Van',
+      hotel: 'Meals Incl.',
+      price: '₹16,500',
+      featured: true,
+    },
+    {
+      img: '/images/kerala.png',
+      dur: '6 Days / 5 Nights',
+      route: 'Kochi → Munnar → Alleppey → Kovalam',
+      name: 'Kerala\nBackwaters Bliss',
+      pax: '2–10 Pax',
+      vehicle: 'Houseboat',
+      hotel: 'Resort Incl.',
+      price: '₹22,000',
+      featured: false,
+    },
+  ];
+
+  return (
+    <section id="packages" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 bg-[#0a0a0a]">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-14 reveal">
+          <div>
+            <div className="section-label mb-3 md:mb-4">Featured Tours</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+              Our Most Beloved<br /><em>Journeys</em>
+            </h2>
+          </div>
+          <a href="#contact" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
+            <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
+              <ArrowRight size={16} />
+            </span>
+            Custom Package
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {packages.map((pkg, i) => (
+            <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal-up reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
+              {pkg.featured && (
+                <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10 bg-red text-black text-[8px] md:text-[9px] tracking-[2px] uppercase px-2.5 md:px-3 py-0.5 md:py-1 rounded-sm">
+                  Popular
+                </div>
+              )}
+              <div className="h-[180px] md:h-[220px] relative overflow-hidden">
+                <img src={pkg.img} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
+                <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-red-light rounded-sm">
+                  {pkg.dur}
+                </div>
+              </div>
+              <div className="p-4 md:p-6">
+                <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-2">{pkg.route}</div>
+                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal leading-tight text-white mb-3 md:mb-4 whitespace-pre-line">{pkg.name}</h3>
+                <div className="flex flex-wrap gap-3 md:gap-4 mb-4 md:mb-5">
+                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax}</span>
+                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Bus size={11} /> {pkg.vehicle}</span>
+                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Hotel size={11} /> {pkg.hotel}</span>
+                </div>
+                <div className="flex items-end justify-between pt-3 md:pt-4 border-t border-white/[0.08]">
+                  <div>
+                    <div className="text-[9px] md:text-[10px] text-white/50 mb-0.5 md:mb-1">Starting from</div>
+                    <div className="font-playfair text-[22px] md:text-[28px] font-light text-red">{pkg.price}<span className="text-[12px] md:text-[14px] text-white/50">/person</span></div>
+                  </div>
+                  <a href="#contact" className="btn-3d-wrapper">
+                    <span className="btn-3d inline-block bg-white/[0.05] border border-white/[0.15] text-white text-[9px] md:text-[10px] tracking-[2px] uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-sm group-hover:bg-red group-hover:border-red group-hover:text-white transition-colors duration-300">
+                      Book Now
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ─── */
+function Testimonials() {
+  const testimonials = [
+    { stars: 5, text: '"Best trip destination knowledge, too much cooperative and honest, excellent service, driving skill excellent. Highly recommend to everyone."', name: 'Rajesh Mehta', loc: 'Bhuj, Gujarat', avatar: 'R' },
+    { stars: 5, text: '"Best service and best travel planner in Bhuj — all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
+    { stars: 5, text: '"Very good service, enjoyed my trip a lot, cars are also good and completely satisfied with the driver. They deserve to be at the top."', name: 'Amit Patel', loc: 'Surat, Gujarat', avatar: 'A' },
+    { stars: 5, text: '"Economical cost, friendly staff and drivers, affordable trip for family. Comfortable and suitable for any occasion. Absolutely loved every moment!"', name: 'Sunita Joshi', loc: 'Vadodara, Gujarat', avatar: 'S' },
+    { stars: 5, text: '"Our Saurashtra darshan was perfectly planned. The driver was so knowledgeable about local temples and traditions. Truly a spiritual experience."', name: 'Deepak Trivedi', loc: 'Mumbai, Maharashtra', avatar: 'D' },
+    { stars: 5, text: '"They arranged our company\'s annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
+    { stars: 5, text: '"The Kutch trip was magical. Sanitized car, professional driver, great hotel recommendations. Maa Tours truly made it once in a lifetime."', name: 'Mohan Desai', loc: 'Bhavnagar, Gujarat', avatar: 'M' },
+    { stars: 5, text: '"Airport pickup was seamless, driver was on time and very polite. Baggage transfer was smooth. Will use Maa Tours for all my future travel needs."', name: 'Neha Chauhan', loc: 'Junagadh, Gujarat', avatar: 'N' },
+  ];
+
+  const allTestimonials = [...testimonials, ...testimonials];
+
+  return (
+    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="text-center mb-10 md:mb-16 reveal-down">
+          <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
+          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+            Memories Crafted,<br /><em>Trust Earned</em>
+          </h2>
+        </div>
+      </div>
+
+      <div className="overflow-hidden">
+        <div className="testi-track flex gap-4 md:gap-6">
+          {allTestimonials.map((t, i) => (
+            <div key={i} className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30">
+              <div className="flex gap-1 mb-3 md:mb-4">
+                {Array.from({ length: t.stars }).map((_, j) => (
+                  <Star key={j} size={13} className="text-red fill-red" />
+                ))}
+              </div>
+              <p className="font-playfair text-[15px] md:text-[17px] italic font-light leading-[1.7] text-white/90 mb-4 md:mb-6">{t.text}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-red/30 to-red/10 flex items-center justify-center font-playfair text-[14px] md:text-[16px] text-red-light border border-red/30">
+                  {t.avatar}
+                </div>
+                <div>
+                  <div className="text-[12px] md:text-[13px] font-medium text-white">{t.name}</div>
+                  <div className="text-[10px] md:text-[11px] text-white/50 tracking-[1px]">{t.loc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Contact ─── */
+function Contact() {
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  const contactItems = [
+    { icon: <Phone size={16} />, label: 'Call Us', val: '+91 9876543210' },
+    { icon: <MessageCircle size={16} />, label: 'WhatsApp', val: '+91 9876543210' },
+    { icon: <Mail size={16} />, label: 'Email', val: 'info@maatourandtravels.in' },
+    { icon: <MapPinned size={16} />, label: 'Office', val: 'Bhuj, Gujarat, India' },
+  ];
+
+  return (
+    <section id="contact" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 bg-gradient-to-br from-[#0a0a0a] to-[#111] relative overflow-hidden">
+      <div className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-red/5 blur-[100px] md:blur-[150px] -top-[100px] md:-top-[200px] -right-[100px] md:-right-[200px] pointer-events-none" />
+
+      <div className="max-w-[1400px] mx-auto relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20">
+          <div className="reveal-left">
+            <div className="section-label mb-3 md:mb-4">Get In Touch</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
+              Begin Your<br /><em>Journey</em><br />With Us Today
+            </h2>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-8 md:mb-10">
+              Whether you're planning a family holiday, a spiritual pilgrimage, a corporate retreat or simply need a reliable ride — we're here, ready to make it extraordinary.
+            </p>
+
+            <div className="flex flex-col gap-3 md:gap-5">
+              {contactItems.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 md:gap-4 p-4 md:p-5 bg-white/[0.03] border border-white/[0.08] rounded transition-all duration-300 hover:bg-white/[0.06] hover:border-red/30">
+                  <div className="w-10 h-10 md:w-11 md:h-11 min-w-[40px] md:min-w-[44px] bg-red-pale border border-red/20 rounded flex items-center justify-center text-red">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-0.5">{item.label}</div>
+                    <div className="text-[13px] md:text-[14px] text-white">{item.val}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="reveal-right">
+            <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
+              <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-6 md:mb-8">Plan Your Journey</h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Your Name</label>
+                  <input type="text" placeholder="Full name" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" required />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Phone Number</label>
+                  <input type="tel" placeholder="+91 XXXXX XXXXX" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" required />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Destination</label>
+                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
+                    <option value="">Select destination</option>
+                    <option>Saurashtra Darshan</option>
+                    <option>Rann of Kutch</option>
+                    <option>Goa</option>
+                    <option>Himachal Pradesh</option>
+                    <option>Rajasthan</option>
+                    <option>Char Dham Yatra</option>
+                    <option>Gujarat Tour</option>
+                    <option>Custom Package</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Travel Date</label>
+                  <input type="date" className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Travellers</label>
+                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
+                    <option>1–2 People</option>
+                    <option>3–5 People</option>
+                    <option>6–10 People</option>
+                    <option>10–20 People</option>
+                    <option>Corporate / Large Group</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Budget Range</label>
+                  <select className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all">
+                    <option>Economy (₹5K–15K)</option>
+                    <option>Standard (₹15K–30K)</option>
+                    <option>Premium (₹30K–60K)</option>
+                    <option>Luxury (₹60K+)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 mb-5 md:mb-6">
+                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Special Requirements</label>
+                <textarea placeholder="Tell us about your dream trip..." rows={3} className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all resize-none" />
+              </div>
+
+              <button
+                type="submit"
+                className={`w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 ${
+                  submitted
+                    ? 'bg-green-600 text-white'
+                    : 'btn-3d bg-red text-black hover:bg-red-light'
+                }`}
+                disabled={submitted}
+              >
+                {submitted ? "✓ Request Sent! We'll call you soon." : 'Send Booking Enquiry'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Footer ─── */
+function Footer() {
+  return (
+    <footer className="bg-black pt-12 md:pt-20 pb-8 md:pb-10 px-4 md:px-8 lg:px-12 border-t border-white/[0.08]">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16 mb-10 md:mb-16">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+              <span className="font-playfair text-xl md:text-2xl text-white">
+                Maa <span className="text-red">Travels</span>
+              </span>
+            </div>
+            <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.8] max-w-[300px]">
+              Your trusted journey companion for over a decade. Crafting unforgettable experiences across India's most magnificent destinations.
+            </p>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Destinations</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['Saurashtra', 'Kutch', 'Rajasthan', 'Himachal', 'Goa', 'Gujarat'].map((item) => (
+                <li key={item}>
+                  <a href="#destinations" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Services</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['Tour Packages', 'Taxi Service', 'Flight Booking', 'Hotel Booking', 'Pilgrimage Tours', 'Corporate Travel'].map((item) => (
+                <li key={item}>
+                  <a href="#services" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Company</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['About Us', 'Testimonials', 'Contact', 'WhatsApp Us'].map((item) => (
+                <li key={item}>
+                  <a href={item === 'About Us' ? '#about' : item === 'Testimonials' ? '#testimonials' : item === 'Contact' ? '#contact' : '#contact'} className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center pt-6 md:pt-8 border-t border-white/[0.08] text-[11px] md:text-[12px] text-white/50 gap-2 md:gap-4">
+          <div>© 2025 Maa Tour & Travels. All rights reserved.</div>
+          <div>
+            Designed with <span className="text-red">♥</span> in Bhuj, Gujarat | <a href="#" className="text-red-light hover:underline">maatourandtravels.in</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ─── WhatsApp Button ─── */
+function WhatsAppButton() {
+  return (
+    <a
+      href="https://wa.me/919876543210"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 md:bottom-8 right-4 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-[#25D366] rounded-full flex items-center justify-center whatsapp-pulse hover:scale-110 transition-transform duration-300"
+      aria-label="Chat on WhatsApp"
+    >
+      <MessageCircle size={22} className="text-white" />
+    </a>
+  );
+}
+
+/* ─── Main App ─── */
+function App() {
+  const progress = useScrollProgress();
+  useReveal();
+
+  return (
+    <div className="bg-black text-white min-h-screen relative">
+      <CustomCursor />
+      <div
+        className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
+        style={{ width: progress + '%' }}
+      />
+      <Navbar />
+      <Hero />
+      <Marquee />
+      <Destinations />
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+      <Services />
+      <About />
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+      <Packages />
+      <Testimonials />
+      <Contact />
+      <Footer />
+      <WhatsAppButton />
+    </div>
+  );
+}
+
+export default App;
