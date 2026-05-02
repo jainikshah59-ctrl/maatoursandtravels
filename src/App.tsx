@@ -595,10 +595,10 @@ function Testimonials() {
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes testiScroll {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-5%); }
         }
         .testi-track {
-          animation: testiScroll 10s linear infinite;
+          animation: testiScroll 20s linear infinite;
         }
         .testi-track:hover {
           animation-play-state: paused;
