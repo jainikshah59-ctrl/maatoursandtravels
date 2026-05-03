@@ -12,17 +12,23 @@ function usePerformanceBoost() {
     // Hero video is intentionally excluded here — loading both at once
     // splits bandwidth and makes the splash take longer to start.
     // Hero video gets its own <link preload> injected once splash ends.
+    // Detect WebM support once
+    const supportsWebM = (() => {
+      const v = document.createElement('video');
+      return v.canPlayType('video/webm; codecs="vp9"') !== '';
+    })();
+
     const splashAssets = [
-      { href: '/videos/splash.mp4', as: 'video' },
-      { href: '/images/logo.jpg',   as: 'image' },
+      { href: supportsWebM ? '/videos/splash.webm' : '/videos/splash.mp4', as: 'video', type: supportsWebM ? 'video/webm' : 'video/mp4' },
+      { href: '/images/logo.webp', as: 'image' },
     ];
-    splashAssets.forEach(({ href, as }) => {
+    splashAssets.forEach(({ href, as, type }: { href: string; as: string; type?: string }) => {
       if (document.querySelector(`link[href="${href}"]`)) return;
       const link = document.createElement('link');
       link.rel  = 'preload';
       link.href = href;
       link.as   = as;
-      if (as === 'video') link.setAttribute('type', 'video/mp4');
+      if (type) link.setAttribute('type', type);
       document.head.appendChild(link);
     });
 
@@ -31,8 +37,8 @@ function usePerformanceBoost() {
 
     // ── 2. Prefetch below-the-fold images after a short idle delay ──
     const belowFoldImages = [
-      '/images/saurashtra.png', '/images/kutch.png', '/images/goa.png',
-      '/images/himachal.png',   '/images/rajasthan.png', '/images/gujarat.png',
+      '/images/saurashtra.webp', '/images/kutch.webp', '/images/goa.webp',
+      '/images/himachal.webp',   '/images/rajasthan.webp', '/images/gujarat.webp',
     ];
     const prefetchImages = () => {
       belowFoldImages.forEach((href) => {
@@ -89,15 +95,17 @@ function usePerformanceBoost() {
     if ('serviceWorker' in navigator) {
       // Inline SW as a Blob so no separate sw.js file is needed
       const swCode = `
-        const CACHE = 'maa-travels-v1';
+        const CACHE = 'maa-travels-v2';
         const PRECACHE = [
-          '/images/logo.jpg',
-          '/images/saurashtra.png',
-          '/images/kutch.png',
-          '/images/goa.png',
-          '/images/himachal.png',
-          '/images/rajasthan.png',
-          '/images/gujarat.png',
+          '/images/logo.webp',
+          '/images/saurashtra.webp',
+          '/images/kutch.webp',
+          '/images/goa.webp',
+          '/images/himachal.webp',
+          '/images/rajasthan.webp',
+          '/images/gujarat.webp',
+          '/images/kerala.webp',
+          '/images/about_journey.webp',
         ];
 
         self.addEventListener('install', (e) => {
@@ -129,7 +137,7 @@ function usePerformanceBoost() {
                 // Cache images and videos on first fetch
                 if (
                   response.ok &&
-                  (e.request.url.match(/\\.(png|jpg|jpeg|webp|mp4|svg)$/))
+                  (e.request.url.match(/\\.(png|jpg|jpeg|webp|webm|mp4|svg)$/))
                 ) {
                   const clone = response.clone();
                   caches.open(CACHE).then((cache) => cache.put(e.request, clone));
@@ -254,7 +262,7 @@ function Navbar() {
     >
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between">
         <a href="#home" className="flex items-center gap-2 md:gap-3">
-          <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+          <img src="/images/logo.webp" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
           <span className="font-playfair text-base md:text-xl text-white tracking-wide">
             Maa <span className="text-red">Travels</span>
           </span>
@@ -329,14 +337,18 @@ function Hero({ splashDone }: { splashDone: boolean }) {
   useEffect(() => {
     if (!splashDone) return;
 
-    // Inject a <link preload> for the hero video the moment splash ends
-    // so the browser can pipeline the fetch alongside React re-render
-    if (!document.querySelector('link[href="/videos/hero_travel.mp4"]')) {
+    // Inject preload for hero video once splash ends
+    const supportsWebM = (() => {
+      const v = document.createElement('video');
+      return v.canPlayType('video/webm; codecs="vp9"') !== '';
+    })();
+    const heroSrc = supportsWebM ? '/videos/hero_travel.webm' : '/videos/hero_travel.mp4';
+    if (!document.querySelector(`link[href="${heroSrc}"]`)) {
       const link = document.createElement('link');
       link.rel  = 'preload';
-      link.href = '/videos/hero_travel.mp4';
+      link.href = heroSrc;
       link.as   = 'video';
-      link.setAttribute('type', 'video/mp4');
+      link.setAttribute('type', supportsWebM ? 'video/webm' : 'video/mp4');
       document.head.appendChild(link);
     }
 
@@ -350,12 +362,14 @@ function Hero({ splashDone }: { splashDone: boolean }) {
       <div className="absolute inset-0">
         <video
   ref={heroVideoRef}
-  src="/videos/hero_travel.mp4"
   muted
   loop
   playsInline
   className="w-full h-full object-cover"
-/>
+>
+  <source src="/videos/hero_travel.webm" type="video/webm" />
+  <source src="/videos/hero_travel.mp4"  type="video/mp4" />
+</video>
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
       </div>
@@ -446,12 +460,12 @@ function Marquee() {
 /* ─── Destinations ─── */
 function Destinations() {
   const destinations = [
-    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.png' },
-    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.png' },
-    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
-    { name: 'Himachal Pradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.png' },
-    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.png' },
-    { name: 'Gujarat Splendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.png' },
+    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.webp' },
+    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.webp' },
+    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.webp' },
+    { name: 'Himachal Pradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.webp' },
+    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.webp' },
+    { name: 'Gujarat Splendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.webp' },
   ];
 
   return (
@@ -474,7 +488,14 @@ function Destinations() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
           <div className="dest-card sm:col-span-2 lg:col-span-6 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up">
-            <img src={destinations[0].img} alt={destinations[0].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <img
+              src={destinations[0].img}
+              srcSet={`${destinations[0].img.replace('.webp','-400.webp')} 400w, ${destinations[0].img.replace('.webp','-800.webp')} 800w, ${destinations[0].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
+              alt={destinations[0].name}
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
               <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[0].tag}</span>
@@ -487,7 +508,15 @@ function Destinations() {
           </div>
 
           <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-1">
-            <img src={destinations[1].img} alt={destinations[1].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <img
+              src={destinations[1].img}
+              srcSet={`${destinations[1].img.replace('.webp','-400.webp')} 400w, ${destinations[1].img.replace('.webp','-800.webp')} 800w, ${destinations[1].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 600px"
+              alt={destinations[1].name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
               <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[1].tag}</span>
@@ -500,7 +529,15 @@ function Destinations() {
           </div>
 
           <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-2">
-            <img src={destinations[2].img} alt={destinations[2].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+            <img
+              src={destinations[2].img}
+              srcSet={`${destinations[2].img.replace('.webp','-400.webp')} 400w, ${destinations[2].img.replace('.webp','-800.webp')} 800w, ${destinations[2].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 600px"
+              alt={destinations[2].name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
               <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[2].tag}</span>
@@ -514,7 +551,15 @@ function Destinations() {
 
           {destinations.slice(3).map((dest, i) => (
             <div key={dest.name} className={`dest-card sm:col-span-1 lg:col-span-4 h-[240px] md:h-[320px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-${i + 1}`}>
-              <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75" />
+              <img
+              src={dest.img}
+              srcSet={`${dest.img.replace('.webp','-400.webp')} 400w, ${dest.img.replace('.webp','-800.webp')} 800w, ${dest.img} 1200w`}
+              sizes="(max-width: 640px) 400px, 600px"
+              alt={dest.name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
                 <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{dest.tag}</span>
@@ -596,7 +641,15 @@ function About() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-center">
           <div className="relative order-2 lg:order-1 reveal-left">
             <div className="w-full aspect-[4/5] relative rounded overflow-hidden max-w-[500px] mx-auto lg:mx-0">
-              <img src="/images/about_journey.png" alt="Family journey" className="w-full h-full object-cover" />
+              <img
+                src="/images/about_journey.webp"
+                srcSet="/images/about_journey-400.webp 400w, /images/about_journey-800.webp 800w, /images/about_journey.webp 1200w"
+                sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 500px"
+                alt="Family journey"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="absolute -bottom-6 md:-bottom-8 -right-2 md:-right-4 lg:-right-8 glass-card rounded-lg p-4 md:p-6 lg:p-7 min-w-[140px] md:min-w-[180px]">
               <div className="font-playfair text-[32px] md:text-[48px] font-light text-red leading-none">10+</div>
@@ -639,7 +692,7 @@ function About() {
 function Packages() {
   const packages = [
     {
-      img: '/images/saurashtra.png',
+      img: '/images/saurashtra.webp',
       dur: '3 Days',
       route: 'Rajkot -> Somnath -> Dwarka -> Return',
       name: 'Saurashtra Darshan',
@@ -649,7 +702,7 @@ function Packages() {
       featured: false,
     },
     {
-      img: '/images/kutch.png',
+      img: '/images/kutch.webp',
       dur: '2 Days',
       route: 'Bhuj -> Rann of Kutch -> Mandvi -> Return',
       name: 'Rann of Kutch',
@@ -659,7 +712,7 @@ function Packages() {
       featured: false,
     },
     {
-      img: '/images/goa.png',
+      img: '/images/goa.webp',
       dur: '5 Days',
       route: 'Panaji -> Calangute -> Baga -> Palolem -> Return',
       name: 'Goa Paradise',
@@ -669,7 +722,7 @@ function Packages() {
       featured: false,
     },
     {
-      img: '/images/himachal.png',
+      img: '/images/himachal.webp',
       dur: '6 Days',
       route: 'Shimla -> Manali -> Dharamshala -> Return',
       name: 'Himachal Pradesh',
@@ -679,7 +732,7 @@ function Packages() {
       featured: false,
     },
     {
-      img: '/images/rajasthan.png',
+      img: '/images/rajasthan.webp',
       dur: '5 Days',
       route: 'Bhuj -> Jaipur -> Jaisalmer -> Udaipur',
       name: 'Rajasthan Royal Heritage',
@@ -689,7 +742,7 @@ function Packages() {
       featured: true,
     },
     {
-      img: '/images/gujarat.png',
+      img: '/images/gujarat.webp',
       dur: '4 Days',
       route: 'Ahmedabad -> Vadodara -> Surat -> Bhuj',
       name: 'Gujarat Splendour',
@@ -727,7 +780,7 @@ function Packages() {
                 </div>
               )}
               <div className="h-[180px] md:h-[220px] relative overflow-hidden">
-                <img src={pkg.img} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img src={pkg.img} srcSet={`${pkg.img.replace(".webp","-400.webp")} 400w, ${pkg.img.replace(".webp","-800.webp")} 800w, ${pkg.img} 1200w`} sizes="(max-width: 640px) 400px, 600px" alt={pkg.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
                 <div className="absolute top-3 md:top-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-red-light rounded-sm">
                   {pkg.dur}
@@ -1031,13 +1084,15 @@ function OurFleet() {
               {/* Car Image */}
               <div className="h-[180px] md:h-[220px] bg-white/[0.03] relative overflow-hidden flex items-center justify-center">
                 <img
-                  src={`/images/${car.slug}.jpg`}
+                  src={`/images/${car.slug}.webp`}
                   alt={car.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;
-                    // If .jpg failed, try .jpeg before showing placeholder
-                    if (!img.src.endsWith('.jpeg')) {
+                    // Fallback chain: webp → jpeg → placeholder
+                    if (img.src.endsWith('.webp')) {
                       img.src = `/images/${car.slug}.jpeg`;
                       return;
                     }
@@ -1306,7 +1361,7 @@ function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16 mb-10 md:mb-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-              <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+              <img src="/images/logo.webp" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
               <span className="font-playfair text-xl md:text-2xl text-white">
                 Maa <span className="text-red">Travels</span>
               </span>
@@ -1452,7 +1507,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
       {/* Video — invisible until first frame is ready, then fades in */}
       <video
         ref={videoRef}
-        src="/videos/splash.mp4"
         autoPlay
         muted
         playsInline
@@ -1462,7 +1516,10 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
           opacity: videoReady ? 1 : 0,
           transition: 'opacity 0.5s ease',
         }}
-      />
+      >
+        <source src="/videos/splash.webm" type="video/webm" />
+        <source src="/videos/splash.mp4"  type="video/mp4" />
+      </video>
       <div className="absolute inset-0 bg-black/20" />
 
       {/* Logo + name — shown until video takes over, then fades out */}
@@ -1474,7 +1531,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
           pointerEvents: 'none',
         }}
       >
-        <img src="/images/logo.jpg" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
+        <img src="/images/logo.webp" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
         <div className="font-playfair text-2xl text-white tracking-wide">
           Maa <span className="text-red">Travels</span>
         </div>
