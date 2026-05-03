@@ -1232,75 +1232,96 @@ function WhatsAppButton() {
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFading, setIsFading] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const doneRef = useRef(false);
+
+  const finish = () => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setIsFading(true);
+    setTimeout(() => {
+      document.body.style.overflow = '';
+      window.scrollTo(0, 0);
+      onComplete();
+    }, 600);
+  };
 
   useEffect(() => {
-    // Lock scroll while splash is showing
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
 
     const video = videoRef.current;
-    if (!video) return;
 
-    const handleLoaded = () => setVideoLoaded(true);
+    // Hard cap: dismiss splash after 4 seconds no matter what
+    const hardCap = setTimeout(finish, 4000);
 
-    const handleEnded = () => {
-      setIsFading(true);
-      setTimeout(() => {
-        document.body.style.overflow = '';
-        window.scrollTo(0, 0);
-        onComplete();
-      }, 800);
-    };
+    if (!video) return () => clearTimeout(hardCap);
 
-    video.addEventListener('loadeddata', handleLoaded);
+    const handleCanPlay = () => setVideoReady(true);
+    const handleEnded = () => finish();
+    // If video errors or stalls, bail out immediately
+    const handleError = () => finish();
+
+    video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('ended', handleEnded);
-
-    // Auto-skip after 10 seconds if video is still playing
-    const timeout = setTimeout(() => {
-      if (!video.paused) {
-        setIsFading(true);
-        setTimeout(() => {
-          document.body.style.overflow = '';
-          window.scrollTo(0, 0);
-          onComplete();
-        }, 800);
-      }
-    }, 10000);
+    video.addEventListener('error', handleError);
 
     return () => {
-      video.removeEventListener('loadeddata', handleLoaded);
+      clearTimeout(hardCap);
+      video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('ended', handleEnded);
-      clearTimeout(timeout);
+      video.removeEventListener('error', handleError);
       document.body.style.overflow = '';
     };
-  }, [onComplete]);
+  }, []);
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black pointer-events-none"
+      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
       style={{
         opacity: isFading ? 0 : 1,
-        transition: 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents: isFading ? 'none' : 'all',
       }}
     >
-      <div
-        className="absolute inset-0"
+      {/* Video plays once ready — logo shows instantly as fallback */}
+      <video
+        ref={videoRef}
+        src="/videos/splash.mp4"
+        autoPlay
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
         style={{
-          transform: videoLoaded ? 'scale(1)' : 'scale(1.05)',
-          transition: 'transform 3s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: videoReady ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+        }}
+      />
+      <div className="absolute inset-0 bg-black/20" />
+
+      {/* Logo shown immediately — visible until/unless video takes over */}
+      <div
+        className="relative z-10 flex flex-col items-center gap-4"
+        style={{
+          opacity: videoReady ? 0 : 1,
+          transition: 'opacity 0.5s ease',
+          pointerEvents: 'none',
         }}
       >
-        <video
-          ref={videoRef}
-          src="/videos/splash.mp4"
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        />
+        <img src="/images/logo.jpg" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
+        <div className="font-playfair text-2xl text-white tracking-wide">
+          Maa <span className="text-red">Travels</span>
+        </div>
+        <div className="flex gap-1.5 mt-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 bg-red rounded-full animate-bounce"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
+        </div>
       </div>
-      <div className="absolute inset-0 bg-black/20" />
     </div>
   );
 }
