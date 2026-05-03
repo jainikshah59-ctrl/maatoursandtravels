@@ -1522,29 +1522,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
       </video>
       <div className="absolute inset-0 bg-black/20" />
 
-      {/* Logo + name — shown until video takes over, then fades out */}
-      <div
-        className="relative z-10 flex flex-col items-center gap-4"
-        style={{
-          opacity: videoReady ? 0 : 1,
-          transition: 'opacity 0.5s ease',
-          pointerEvents: 'none',
-        }}
-      >
-        <img src="/images/logo.webp" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
-        <div className="font-playfair text-2xl text-white tracking-wide">
-          Maa <span className="text-red">Travels</span>
-        </div>
-        <div className="flex gap-1.5 mt-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-1.5 h-1.5 bg-red rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
-          ))}
-        </div>
-      </div>
+
     </div>
   );
 }
