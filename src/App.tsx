@@ -973,112 +973,11 @@ function Testimonials() {
 }
 
 /* ─── Our Fleet ─── */
-function OurFleet() {
-  const cars = [
-    { name: 'Ertiga', slug: 'ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
-    { name: 'Toyota Innova', slug: 'toyota-innova', type: 'SUV · 7 Seater', desc: 'The gold standard in premium cab travel — powerful, plush, and perfect for long journeys.' },
-    { name: 'Innova Crysta', slug: 'innova-crysta', type: 'SUV · 7 Seater', desc: 'Premium variant of the Innova with superior interiors and ride comfort for discerning travellers.' },
-    { name: 'Sedan', slug: 'sedan', type: 'Sedan · 4 Seater', desc: 'Sleek and fuel-efficient sedan for comfortable airport transfers and city rides.' },
-    { name: 'Toofan (Non-AC)', slug: 'toofan-non-ac', type: 'Van · 8 Seater', desc: 'Rugged and economical van — perfect for group travel on a budget without compromising on space.' },
-    { name: 'Toofan (AC)', slug: 'toofan-ac', type: 'Van · 8 Seater', desc: 'Air-conditioned Toofan for comfortable group journeys in all seasons across Gujarat.' },
-    { name: 'Tempo Traveller', slug: 'tempo-traveller', type: 'Minivan · 12–17 Seater', desc: 'The ultimate choice for large group travel — spacious, comfortable, and built for long routes.' },
-    { name: 'Bus', slug: 'bus', type: 'Bus · 20–50 Seater', desc: 'Full-size buses for corporate trips, school excursions, and large group pilgrimages across India.' },
-    { name: 'Urbania', slug: 'urbania', type: 'Luxury Van · 17 Seater', desc: 'Force Urbania — a luxury coach with premium seating for a first-class group travel experience.' },
-  ];
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollStart, setScrollStart] = useState(0);
-
-  const onMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX);
-    setScrollStart(scrollRef.current?.scrollLeft ?? 0);
-  };
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    scrollRef.current.scrollLeft = scrollStart - (e.pageX - startX);
-  };
-  const onMouseUp = () => setIsDragging(false);
-
-  return (
-    <section className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-10 md:mb-16 reveal-down">
-          <div className="section-label mb-3 md:mb-4">Our Fleet</div>
-          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
-            Travel in <em>Comfort &amp; Style</em>
-          </h2>
-          <p className="text-[13px] md:text-[14px] text-white/50 mt-3 md:mt-4 max-w-[480px] mx-auto leading-[1.8]">Swipe to explore the vehicles we use for your journeys</p>
-        </div>
-      </div>
-      <div
-        ref={scrollRef}
-        className="overflow-x-auto scrollbar-hide px-4 md:px-8 lg:px-12"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', cursor: isDragging ? 'grabbing' : 'grab', WebkitOverflowScrolling: 'touch' }}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        <div className="flex gap-4 md:gap-6" style={{ width: 'max-content', paddingBottom: '8px' }}>
-          {cars.map((car) => (
-            <div
-              key={car.slug}
-              className="flex-shrink-0 w-[280px] md:w-[360px] bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden group hover:border-red/30 transition-all duration-300 select-none"
-            >
-              {/* Car Image */}
-              <div className="h-[180px] md:h-[220px] bg-white/[0.03] relative overflow-hidden flex items-center justify-center">
-                <img
-                  src={`/images/${car.slug}.jpg`}
-                  alt={car.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    // If .jpg failed, try .jpeg before showing placeholder
-                    if (!img.src.endsWith('.jpeg')) {
-                      img.src = `/images/${car.slug}.jpeg`;
-                      return;
-                    }
-                    img.style.display = 'none';
-                    const parent = img.parentElement;
-                    if (parent && !parent.querySelector('.placeholder-icon')) {
-                      const ph = document.createElement('div');
-                      ph.className = 'placeholder-icon flex flex-col items-center justify-center gap-3 absolute inset-0';
-                      ph.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="6" rx="1"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg><span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2)">Image Coming Soon</span>`;
-                      parent.appendChild(ph);
-                    }
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent pointer-events-none" />
-                <div className="absolute top-3 left-3 glass-card px-2.5 py-0.5 text-[9px] tracking-[1.5px] uppercase text-red-light rounded-sm">
-                  {car.type}
-                </div>
-              </div>
-              {/* Car Info */}
-              <div className="p-5 md:p-6">
-                <h3 className="font-playfair text-[20px] md:text-[24px] font-normal text-white mb-2">{car.name}</h3>
-                <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.7]">{car.desc}</p>
-                <a
-                  href="#booking"
-                  className="mt-4 flex items-center gap-2 text-[9px] md:text-[10px] tracking-[2px] uppercase text-red hover:text-red-light transition-colors duration-300"
-                >
-                  <Car size={12} /> Book This Car
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 function Contact() {
   const [formData, setFormData] = useState({
     name: '',
     serviceType: '',
-    carType: '',
     pickup: '',
     drop: '',
     date: '',
@@ -1106,7 +1005,6 @@ function Contact() {
     const msg = `Hello Maa Travels! I would like to book a journey.
 
 *Service Type:* ${serviceLabel}
-*Car Type:* ${formData.carType || 'Not specified'}
 *Name:* ${formData.name}
 *Pickup:* ${formData.pickup}
 *Drop:* ${formData.drop}
@@ -1183,37 +1081,6 @@ function Contact() {
                 </div>
               </div>
 
-              {/* Car Type Selector */}
-              <div className="flex flex-col gap-2 mb-5 md:mb-6">
-                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Car Type</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {([
-                    { value: 'Ertiga', label: 'Ertiga' },
-                    { value: 'Toyota Innova', label: 'Innova' },
-                    { value: 'Innova Crysta', label: 'Crysta' },
-                    { value: 'Sedan', label: 'Sedan' },
-                    { value: 'Toofan (Non-AC)', label: 'Toofan Non-AC' },
-                    { value: 'Toofan (AC)', label: 'Toofan AC' },
-                    { value: 'Tempo Traveller', label: 'Tempo' },
-                    { value: 'Bus', label: 'Bus' },
-                    { value: 'Urbania', label: 'Urbania' },
-                  ] as { value: string; label: string }[]).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, carType: opt.value })}
-                      className={`flex items-center justify-center gap-1.5 py-2.5 px-1 rounded text-[9px] tracking-[1px] uppercase font-medium transition-all duration-300 border ${
-                        formData.carType === opt.value
-                          ? 'bg-red border-red text-white'
-                          : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
-                      }`}
-                    >
-                      <Car size={11} />
-                      <span className="leading-none truncate">{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div className="flex flex-col gap-3 md:gap-4 mb-5 md:mb-6">
                 <div className="flex flex-col gap-2">
@@ -1514,7 +1381,6 @@ function App() {
         <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
         <Packages />
         <Testimonials />
-        <OurFleet />
         <Contact />
         <Footer />
         <WhatsAppButton />
