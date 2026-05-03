@@ -1391,7 +1391,6 @@ function WhatsAppButton() {
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFading, setIsFading] = useState(false);
-  // videoReady = browser has enough data to start playing (≥1% downloaded)
   const [videoReady, setVideoReady] = useState(false);
   const doneRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1415,14 +1414,14 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     const video = videoRef.current;
     if (!video) return;
 
-    // 10-second safety net — if video never starts, open the site
+    // 10-second safety net — if video never becomes playable, open the site
     timeoutRef.current = setTimeout(() => finish(), 10000);
 
-    // `loadeddata` fires as soon as the first frame is decoded (~1% downloaded).
-    // This is earlier than `canplay` — perfect for "start as soon as anything arrives".
+    // `loadeddata` fires as soon as the first frame is decoded (earliest possible —
+    // effectively ~1% downloaded). Switch to video immediately at this point.
     const handleLoadedData = () => {
       setVideoReady(true);
-      video.play().catch(() => finish()); // autoplay blocked? just bail
+      video.play().catch(() => finish());
     };
 
     const handleEnded = () => finish();
@@ -1443,26 +1442,14 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black"
+      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
       style={{
         opacity: isFading ? 0 : 1,
         transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: isFading ? 'none' : 'all',
       }}
     >
-      {/* Static poster image — shown instantly, covers the screen until video takes over */}
-      <img
-        src="/videos/splash-poster.jpg"
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          opacity: videoReady ? 0 : 1,
-          transition: 'opacity 0.5s ease',
-        }}
-      />
-
-      {/* Video — fades in the moment the first frame is ready */}
+      {/* Video — invisible until first frame is ready, then fades in */}
       <video
         ref={videoRef}
         src="/videos/splash.mp4"
@@ -1476,6 +1463,31 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
           transition: 'opacity 0.5s ease',
         }}
       />
+      <div className="absolute inset-0 bg-black/20" />
+
+      {/* Logo + name — shown until video takes over, then fades out */}
+      <div
+        className="relative z-10 flex flex-col items-center gap-4"
+        style={{
+          opacity: videoReady ? 0 : 1,
+          transition: 'opacity 0.5s ease',
+          pointerEvents: 'none',
+        }}
+      >
+        <img src="/images/logo.jpg" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
+        <div className="font-playfair text-2xl text-white tracking-wide">
+          Maa <span className="text-red">Travels</span>
+        </div>
+        <div className="flex gap-1.5 mt-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 bg-red rounded-full animate-bounce"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
