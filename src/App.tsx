@@ -1057,12 +1057,7 @@ function App() {
       <Hero />
       
       
-              <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-1 md:mt-2">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-<Marquee />
+              <Marquee />
       <Destinations />
       <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
       <Services />
