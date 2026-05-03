@@ -868,8 +868,14 @@ function OurFleet() {
                   alt={car.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    const parent = (e.target as HTMLImageElement).parentElement;
+                    const img = e.target as HTMLImageElement;
+                    // If .jpg failed, try .jpeg before showing placeholder
+                    if (!img.src.endsWith('.jpeg')) {
+                      img.src = `/images/${car.slug}.jpeg`;
+                      return;
+                    }
+                    img.style.display = 'none';
+                    const parent = img.parentElement;
                     if (parent && !parent.querySelector('.placeholder-icon')) {
                       const ph = document.createElement('div');
                       ph.className = 'placeholder-icon flex flex-col items-center justify-center gap-3 absolute inset-0';
