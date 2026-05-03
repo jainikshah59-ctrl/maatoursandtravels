@@ -1,4 +1,4 @@
-]import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin, Car, Plane, Church, Building2,
   Phone, MessageCircle, Mail, MapPinned, Check,
