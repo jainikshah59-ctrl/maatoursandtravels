@@ -8,13 +8,15 @@ import {
 /* ─── Performance Boost ─── */
 function usePerformanceBoost() {
   useEffect(() => {
-    // ── 1. Preload critical above-the-fold assets immediately ──
-    const criticalAssets = [
-      { href: '/videos/splash.mp4',      as: 'video' },
-      { href: '/videos/hero_travel.mp4', as: 'video' },
-      { href: '/images/logo.jpg',        as: 'image' },
+    // ── 1. Preload ONLY the splash video + logo immediately ──
+    // Hero video is intentionally excluded here — loading both at once
+    // splits bandwidth and makes the splash take longer to start.
+    // Hero video gets its own <link preload> injected once splash ends.
+    const splashAssets = [
+      { href: '/videos/splash.mp4', as: 'video' },
+      { href: '/images/logo.jpg',   as: 'image' },
     ];
-    criticalAssets.forEach(({ href, as }) => {
+    splashAssets.forEach(({ href, as }) => {
       if (document.querySelector(`link[href="${href}"]`)) return;
       const link = document.createElement('link');
       link.rel  = 'preload';
@@ -23,6 +25,9 @@ function usePerformanceBoost() {
       if (as === 'video') link.setAttribute('type', 'video/mp4');
       document.head.appendChild(link);
     });
+
+    // Preload hero video only after splash — injected when splashDone becomes true
+    // (handled separately in Hero component via useEffect on splashDone)
 
     // ── 2. Prefetch below-the-fold images after a short idle delay ──
     const belowFoldImages = [
@@ -322,7 +327,20 @@ function Hero({ splashDone }: { splashDone: boolean }) {
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (splashDone && heroVideoRef.current) {
+    if (!splashDone) return;
+
+    // Inject a <link preload> for the hero video the moment splash ends
+    // so the browser can pipeline the fetch alongside React re-render
+    if (!document.querySelector('link[href="/videos/hero_travel.mp4"]')) {
+      const link = document.createElement('link');
+      link.rel  = 'preload';
+      link.href = '/videos/hero_travel.mp4';
+      link.as   = 'video';
+      link.setAttribute('type', 'video/mp4');
+      document.head.appendChild(link);
+    }
+
+    if (heroVideoRef.current) {
       heroVideoRef.current.play().catch(() => {});
     }
   }, [splashDone]);
@@ -1428,6 +1446,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
         autoPlay
         muted
         playsInline
+        preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: videoReady ? 1 : 0,
