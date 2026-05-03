@@ -1172,38 +1172,40 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
 /* ─── Main App ─── */
 function App() {
+  const [splashDone, setSplashDone] = useState(false);
   const progress = useScrollProgress();
   useReveal();
 
   return (
-    <div className="bg-black text-white min-h-screen relative">
-        <style>{`
-          @keyframes testiScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-        `}</style>
-      <CustomCursor />
-      <div
-        className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
-        style={{ width: progress + '%' }}
-      />
-      <Navbar />
-      <Hero />
-      
-      
-              <Marquee />
-      <Destinations />
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
-      <Services />
-      <About />
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
-      <Packages />
-      <Testimonials />
-      <Contact />
-      <Footer />
-      <WhatsAppButton />
-    </div>
+    <>
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
+      <div className="bg-black text-white min-h-screen relative">
+          <style>{`
+            @keyframes testiScroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+        <CustomCursor />
+        <div
+          className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
+          style={{ width: progress + '%' }}
+        />
+        <Navbar />
+        <Hero />
+        <Marquee />
+        <Destinations />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+        <Services />
+        <About />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+        <Packages />
+        <Testimonials />
+        <Contact />
+        <Footer />
+        <WhatsAppButton />
+      </div>
+    </>
   );
 }
 
