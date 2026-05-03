@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   MapPin, Car, Plane, Hotel, Church, Building2,
   Phone, MessageCircle, Mail, MapPinned, Check,
-  ArrowRight, Star, Menu, X, ChevronRight, Users, Bus
+  ArrowRight, Star, Menu, X, ChevronRight, Users
 } from 'lucide-react';
 
 /* ─── Scroll Progress Hook ─── */
@@ -148,7 +148,7 @@ function Navbar() {
       </div>
 
       {/* Mobile Nav */}
-      {menuOpen && (
+      {menuOpen &amp;&amp; (
         <div className="lg:hidden bg-black/95 backdrop-blur-xl border-t border-white/[0.08] px-6 py-6 max-h-[80vh] overflow-y-auto">
           <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (
@@ -266,7 +266,7 @@ function Marquee() {
   const items = [
     'Saurashtra Darshan', 'Kutch Desert Festival', 'Goa Beach Escape',
     'Himachal Snow Retreat', 'Char Dham Yatra', 'Rajasthan Royal Tour',
-    'Gujarat Heritage Circuit', 'Corporate Tours & Events',
+    'Gujarat Heritage Circuit', 'Corporate Tours &amp; Events',
   ];
 
   return (
@@ -288,7 +288,7 @@ function Destinations() {
   const destinations = [
     { name: 'Saurashtra\nDarshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.png' },
     { name: 'Rann of\nKutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.png' },
-    { name: 'Goa\nParadise', tag: 'Beach & Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
+    { name: 'Goa\nParadise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
     { name: 'Himachal\nPradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.png' },
     { name: 'Rajasthan\nRoyale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.png' },
     { name: 'Gujarat\nSplendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.png' },
@@ -376,10 +376,10 @@ function Destinations() {
 function Services() {
   const services = [
     { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes — designed around your dreams.', link: '#packages' },
-    { icon: <Car size={22} />, title: 'Premium Taxi & Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
+    { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
     { icon: <Plane size={22} />, title: 'Flight Ticket Booking', desc: 'Lowest fares on domestic and international flights. Special rates and exclusive deals you won\'t find anywhere else.', link: '#contact' },
     { icon: <Hotel size={22} />, title: 'Hotel Reservations', desc: 'Handpicked accommodations from budget-friendly stays to five-star luxury resorts. Verified, reliable, perfectly located.', link: '#contact' },
-    { icon: <Church size={22} />, title: 'Spiritual & Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond — reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
+    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond — reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
     { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#contact' },
   ];
 
@@ -399,7 +399,7 @@ function Services() {
               key={service.title}
               className={`service-card bg-[#0a0a0a] p-6 md:p-10 lg:p-12 relative overflow-hidden group transition-all duration-400 hover:bg-[#111] ${
                 i < services.length - 1 ? 'border-b border-white/[0.08]' : ''
-              } ${i % 2 === 0 && i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
+              } ${i % 2 === 0 &amp;&amp; i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
               <div className="relative z-10">
@@ -423,10 +423,10 @@ function Services() {
 /* ─── About ─── */
 function About() {
   const features = [
-    { strong: '10+ Years', text: 'of industry expertise & local knowledge' },
+    { strong: '10+ Years', text: 'of industry expertise &amp; local knowledge' },
     { strong: 'Safety First', text: '— sanitized vehicles, trained drivers, regular checks' },
     { strong: 'Transparent Pricing', text: '— no hidden charges, ever' },
-    { strong: 'Government & Corporate', text: 'approved travel contracts' },
+    { strong: 'Government &amp; Corporate', text: 'approved travel contracts' },
     { strong: '24/7 Support', text: '— your ride is always just a call away' },
   ];
 
@@ -450,7 +450,7 @@ function About() {
               Your Most Trusted<br /><em>Travel Partner</em><br />in Gujarat
             </h2>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-4 md:mb-5">
-              For over a decade, Maa Tour & Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
+              For over a decade, Maa Tour &amp; Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
             </p>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-6 md:mb-8">
               Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service — because your dream holiday deserves nothing less than perfection.
@@ -534,7 +534,7 @@ Backwaters Bliss',
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {packages.map((pkg, i) => (
             <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal-up reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
-              {pkg.featured && (
+              {pkg.featured &amp;&amp; (
                 <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10 bg-red text-black text-[8px] md:text-[9px] tracking-[2px] uppercase px-2.5 md:px-3 py-0.5 md:py-1 rounded-sm">
                   Popular
                 </div>
@@ -595,7 +595,7 @@ function Testimonials() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resumeTimerRef = useRef<number | null>(null);
   const wasDraggingRef = useRef(false);
 
   const clearResumeTimer = () => {
@@ -688,30 +688,6 @@ function Testimonials() {
 
   return (
     <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes testiScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .testi-track {
-          animation: testiScroll 20s linear infinite;
-        }
-        .testi-track.paused {
-          animation-play-state: paused;
-        }
-        .testi-container {
-          overflow-x: auto;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          cursor: grab;
-        }
-        .testi-container::-webkit-scrollbar {
-          display: none;
-        }
-        .testi-container:active {
-          cursor: grabbing;
-        }
-      `}} />
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-10 md:mb-16 reveal-down">
           <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
@@ -722,7 +698,8 @@ function Testimonials() {
       </div>
 
       <div 
-        className="testi-container overflow-hidden"
+        className="overflow-hidden"
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
@@ -735,13 +712,17 @@ function Testimonials() {
       >
         <div 
           ref={trackRef}
-          className={`testi-track flex gap-4 md:gap-6 ${isPaused ? 'paused' : ''}`}
-          style={{ width: 'max-content' }}
+          className="flex gap-4 md:gap-6"
+          style={{
+            width: 'max-content',
+            animation: isPaused ? 'none' : 'testiScroll 20s linear infinite',
+            animationPlayState: isPaused ? 'paused' : 'running'
+          }}
         >
           {allTestimonials.map((t, i) => (
             <div 
               key={i} 
-              className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
+              className="min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
               onMouseDown={(e) => e.preventDefault()}
             >
               <div className="flex gap-1 mb-3 md:mb-4">
@@ -793,7 +774,7 @@ function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const msg = `Hello Maa Travels! I would like to book a journey.%0A%0A*Name:* ${formData.name}%0A*Pickup:* ${formData.pickup}%0A*Drop:* ${formData.drop}%0A*Date & Time:* ${formData.datetime}`;
+    const msg = `Hello Maa Travels! I would like to book a journey.%0A%0A*Name:* ${formData.name}%0A*Pickup:* ${formData.pickup}%0A*Drop:* ${formData.drop}%0A*Date &amp; Time:* ${formData.datetime}`;
     window.open(`https://wa.me/919558050710?text=${msg}`, '_blank');
   };
 
@@ -882,7 +863,7 @@ function Contact() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date & Time</label>
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date &amp; Time</label>
                   <input 
                     type="datetime-local" 
                     name="datetime"
@@ -969,7 +950,7 @@ function Footer() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center pt-6 md:pt-8 border-t border-white/[0.08] text-[11px] md:text-[12px] text-white/50 gap-2 md:gap-4">
-          <div>© 2025 Maa Tour & Travels. All rights reserved.</div>
+          <div>© 2025 Maa Tour &amp; Travels. All rights reserved.</div>
           <div>
             Designed with <span className="text-red">♥</span> in Bhuj, Gujarat | <a href="#" className="text-red-light hover:underline">maatourandtravels.in</a>
           </div>
@@ -1003,6 +984,12 @@ function App() {
 
   return (
     <div className="bg-black text-white min-h-screen relative">
+      <style>{`
+        @keyframes testiScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
       <CustomCursor />
       <div
         className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
