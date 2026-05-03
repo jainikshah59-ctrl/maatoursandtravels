@@ -1177,18 +1177,12 @@ function App() {
 
   return (
     <div className="bg-black text-white min-h-screen relative">
-      <style>{`
-        @keyframes testiScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
-      <style>{`
-        @keyframes testiScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
+        <style>{`
+          @keyframes testiScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
       <CustomCursor />
       <div
         className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
