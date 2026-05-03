@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+]import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin, Car, Plane, Church, Building2,
   Phone, MessageCircle, Mail, MapPinned, Check,
@@ -808,8 +808,7 @@ function Testimonials() {
 /* ─── Our Fleet ─── */
 function OurFleet() {
   const cars = [
-    { name: 'Toyota Ertiga', slug: 'toyota-ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
-    { name: 'Toyota Ertiga', slug: 'toyota-ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
+    { name: 'Ertiga', slug: 'ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
     { name: 'Toyota Innova', slug: 'toyota-innova', type: 'SUV · 7 Seater', desc: 'The gold standard in premium cab travel — powerful, plush, and perfect for long journeys.' },
     { name: 'Innova Crysta', slug: 'innova-crysta', type: 'SUV · 7 Seater', desc: 'Premium variant of the Innova with superior interiors and ride comfort for discerning travellers.' },
     { name: 'Sedan', slug: 'sedan', type: 'Sedan · 4 Seater', desc: 'Sleek and fuel-efficient sedan for comfortable airport transfers and city rides.' },
@@ -1016,7 +1015,7 @@ function Contact() {
                 <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Car Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {([
-                    { value: 'Toyota Ertiga', label: 'Ertiga' },
+                    { value: 'Ertiga', label: 'Ertiga' },
                     { value: 'Toyota Innova', label: 'Innova' },
                     { value: 'Innova Crysta', label: 'Crysta' },
                     { value: 'Sedan', label: 'Sedan' },
@@ -1222,6 +1221,10 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
+    // Lock scroll while splash is showing
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -1229,7 +1232,11 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
     const handleEnded = () => {
       setIsFading(true);
-      setTimeout(onComplete, 800);
+      setTimeout(() => {
+        document.body.style.overflow = '';
+        window.scrollTo(0, 0);
+        onComplete();
+      }, 800);
     };
 
     video.addEventListener('loadeddata', handleLoaded);
@@ -1239,7 +1246,11 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     const timeout = setTimeout(() => {
       if (!video.paused) {
         setIsFading(true);
-        setTimeout(onComplete, 800);
+        setTimeout(() => {
+          document.body.style.overflow = '';
+          window.scrollTo(0, 0);
+          onComplete();
+        }, 800);
       }
     }, 10000);
 
@@ -1247,6 +1258,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
       video.removeEventListener('loadeddata', handleLoaded);
       video.removeEventListener('ended', handleEnded);
       clearTimeout(timeout);
+      document.body.style.overflow = '';
     };
   }, [onComplete]);
 
