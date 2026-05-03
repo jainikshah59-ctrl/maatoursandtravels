@@ -1071,17 +1071,26 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
     const handleLoaded = () => setVideoLoaded(true);
 
-    video.addEventListener('loadeddata', handleLoaded);
-
-    // Start fade out at 4 seconds, remove from DOM after fade (0.8s)
-    const fadeTimeout = setTimeout(() => {
+    const handleEnded = () => {
       setIsFading(true);
       setTimeout(onComplete, 800);
-    }, 4000);
+    };
+
+    video.addEventListener('loadeddata', handleLoaded);
+    video.addEventListener('ended', handleEnded);
+
+    // Auto-skip after 10 seconds if video is still playing
+    const timeout = setTimeout(() => {
+      if (!video.paused) {
+        setIsFading(true);
+        setTimeout(onComplete, 800);
+      }
+    }, 10000);
 
     return () => {
       video.removeEventListener('loadeddata', handleLoaded);
-      clearTimeout(fadeTimeout);
+      video.removeEventListener('ended', handleEnded);
+      clearTimeout(timeout);
     };
   }, [onComplete]);
 
