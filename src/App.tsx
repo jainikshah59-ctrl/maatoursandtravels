@@ -770,8 +770,9 @@ function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const msg = `Hello Maa Travels! I would like to book a journey.%0A%0A*Name:* ${formData.name}%0A*Pickup:* ${formData.pickup}%0A*Drop:* ${formData.drop}%0A*Date &amp; Time:* ${formData.datetime}`;
-    window.open(`https://wa.me/919558050710?text=${msg}`, '_blank');
+    const msg = `Hello Maa Travels! I would like to book a journey.%0A%0A*Name:* ${formData.name}%0A*Pickup:* ${formData.pickup}%0A*Drop:* ${formData.drop}%0A*Date and Time:* ${formData.datetime}`;
+    const encodedMsg = encodeURIComponent(msg);
+    window.open(`https://wa.me/919558050710?text=${encodedMsg}`, '_blank');
   };
 
   const contactItems = [
