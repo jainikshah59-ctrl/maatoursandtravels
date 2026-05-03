@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  MapPin, Car, Plane, Hotel, Church, Building2,
+  MapPin, Car, Plane, Church, Building2,
   Phone, MessageCircle, Mail, MapPinned, Check,
   ArrowRight, Star, Menu, X, ChevronRight, Users
 } from 'lucide-react';
@@ -370,8 +370,8 @@ function Services() {
   const services = [
     { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes - designed around your dreams.', link: '#packages' },
     { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
-    { icon: <Plane size={22} />, title: 'Flight Ticket Booking', desc: 'Lowest fares on domestic and international flights. Special rates and exclusive deals you won\'t find anywhere else.', link: '#contact' },
-    { icon: <Hotel size={22} />, title: 'Hotel Reservations', desc: 'Handpicked accommodations from budget-friendly stays to five-star luxury resorts. Verified, reliable, perfectly located.', link: '#contact' },
+    { icon: <Plane size={22} />, title: 'Airport Pick & Drop', desc: 'Punctual, comfortable airport transfers to and from all major airports. Flight tracking, meet & greet, and zero waiting stress.', link: '#contact' },
+    { icon: <MapPin size={22} />, title: 'Railway Station Pick & Drop', desc: 'Reliable pickup and drop service to all major railway stations. On-time arrivals, luggage assistance, and hassle-free rides.', link: '#contact' },
     { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
     { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#contact' },
   ];
@@ -813,6 +813,7 @@ function Testimonials() {
 function Contact() {
   const [formData, setFormData] = useState({
     name: '',
+    serviceType: '',
     pickup: '',
     drop: '',
     date: '',
@@ -836,8 +837,10 @@ function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const serviceLabel = formData.serviceType === 'airport' ? 'Airport Pick & Drop' : formData.serviceType === 'railway' ? 'Railway Station Pick & Drop' : 'Outstation Pick & Drop';
     const msg = `Hello Maa Travels! I would like to book a journey.
 
+*Service Type:* ${serviceLabel}
 *Name:* ${formData.name}
 *Pickup:* ${formData.pickup}
 *Drop:* ${formData.drop}
@@ -886,7 +889,32 @@ function Contact() {
 
           <div className="reveal-right">
             <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
-              <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-6 md:mb-8">Plan Your Journey</h3>
+              <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-4 md:mb-6">Plan Your Journey</h3>
+
+              {/* Service Type Selector */}
+              <div className="flex flex-col gap-2 mb-5 md:mb-6">
+                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Service Type</label>
+                <div className="grid grid-cols-3 gap-2 md:gap-3">
+                  {[
+                    { value: 'airport', label: '✈ Airport' },
+                    { value: 'railway', label: '🚂 Railway' },
+                    { value: 'outstation', label: '🚗 Outstation' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, serviceType: opt.value })}
+                      className={`py-2.5 md:py-3 px-2 rounded text-[10px] md:text-[11px] tracking-[1.5px] uppercase font-medium transition-all duration-300 border ${
+                        formData.serviceType === opt.value
+                          ? 'bg-red border-red text-white'
+                          : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="flex flex-col gap-3 md:gap-4 mb-5 md:mb-6">
                 <div className="flex flex-col gap-2">
@@ -959,7 +987,8 @@ function Contact() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 btn-3d bg-red text-black hover:bg-red-light"
+                disabled={!formData.serviceType}
+                className="w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 btn-3d bg-red text-black hover:bg-red-light disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Send Booking Enquiry
               </button>
