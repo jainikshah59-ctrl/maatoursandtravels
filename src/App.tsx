@@ -130,7 +130,7 @@ function Navbar() {
         </ul>
 
         <div className="hidden lg:block">
-          <a href="#contact" className="btn-3d-wrapper">
+          <a href="#booking" className="btn-3d-wrapper">
             <span className="btn-3d inline-block bg-red text-white px-5 md:px-6 py-2.5 md:py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm cursor-pointer">
               Book Now
             </span>
@@ -163,7 +163,7 @@ function Navbar() {
               </li>
             ))}
             <li className="pt-2">
-              <a href="#contact" onClick={() => setMenuOpen(false)} className="btn-3d-wrapper inline-block">
+              <a href="#booking" onClick={() => setMenuOpen(false)} className="btn-3d-wrapper inline-block">
                 <span className="btn-3d inline-block bg-red text-white px-6 py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm">
                   Book Now
                 </span>
@@ -369,11 +369,11 @@ function Destinations() {
 function Services() {
   const services = [
     { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes - designed around your dreams.', link: '#packages' },
-    { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
-    { icon: <Plane size={22} />, title: 'Airport Pick & Drop', desc: 'Punctual, comfortable airport transfers to and from all major airports. Flight tracking, meet & greet, and zero waiting stress.', link: '#contact' },
-    { icon: <MapPin size={22} />, title: 'Railway Station Pick & Drop', desc: 'Reliable pickup and drop service to all major railway stations. On-time arrivals, luggage assistance, and hassle-free rides.', link: '#contact' },
+    { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#booking' },
+    { icon: <Plane size={22} />, title: 'Airport Pick & Drop', desc: 'Punctual, comfortable airport transfers to and from all major airports. Flight tracking, meet & greet, and zero waiting stress.', link: '#booking' },
+    { icon: <MapPin size={22} />, title: 'Railway Station Pick & Drop', desc: 'Reliable pickup and drop service to all major railway stations. On-time arrivals, luggage assistance, and hassle-free rides.', link: '#booking' },
     { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
-    { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#contact' },
+    { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#booking' },
   ];
 
   return (
@@ -543,7 +543,7 @@ function Packages() {
               Our Most Beloved<br /><em>Journeys</em>
             </h2>
           </div>
-          <a href="#contact" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
+          <a href="#booking" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
             <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
               <ArrowRight size={16} />
             </span>
@@ -576,7 +576,7 @@ function Packages() {
                   <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax} Passengers</span>
                 </div>
                 <div className="pt-3 md:pt-4 border-t border-white/[0.08]">
-                  <a href="#contact" className="btn-3d-wrapper block w-full">
+                  <a href="#booking" className="btn-3d-wrapper block w-full">
                     <span className="btn-3d flex items-center justify-center gap-2 w-full bg-white/[0.05] border border-white/[0.15] text-white text-[9px] md:text-[10px] tracking-[2px] uppercase px-3 md:px-4 py-2.5 md:py-3 rounded-sm group-hover:bg-red group-hover:border-red group-hover:text-white transition-colors duration-300">
                       <Car size={12} /> Book Cab
                     </span>
@@ -882,7 +882,7 @@ function OurFleet() {
                 <h3 className="font-playfair text-[20px] md:text-[24px] font-normal text-white mb-2">{car.name}</h3>
                 <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.7]">{car.desc}</p>
                 <a
-                  href="#contact"
+                  href="#booking"
                   className="mt-4 flex items-center gap-2 text-[9px] md:text-[10px] tracking-[2px] uppercase text-red hover:text-red-light transition-colors duration-300"
                 >
                   <Car size={12} /> Book This Car
@@ -974,7 +974,7 @@ function Contact() {
             </div>
           </div>
 
-          <div className="reveal-right">
+          <div className="reveal-right" id="booking">
             <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
               <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-4 md:mb-6">Plan Your Journey</h3>
 
