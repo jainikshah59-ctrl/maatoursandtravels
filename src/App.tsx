@@ -250,13 +250,7 @@ function Hero() {
         ))}
       </div>
 
-      {/* Scroll to explore - below stats on mobile, left side on desktop */}
-      <div className="absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 md:gap-4 text-[10px] md:text-[11px] tracking-[2px] uppercase text-white/50 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '1s' }}>
-        <div className="w-[40px] md:w-[60px] h-[1px] bg-gradient-to-r from-red to-transparent relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-red-light" style={{ animation: 'scrollLine 2s linear infinite' }} />
-        </div>
-        Scroll to explore
-      </div>
+      
     </section>
   );
 }
