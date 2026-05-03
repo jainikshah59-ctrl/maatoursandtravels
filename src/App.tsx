@@ -241,7 +241,7 @@ function Hero() {
       <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
         {[
           { num: '10+', label: 'Years of Trust' },
-          { num: '10K+', label: 'Happy Travellers' },
+          { num: '5K+', label: 'Happy Travellers' },
           { num: '50+', label: 'Destinations' },
         ].map((stat) => (
           <div key={stat.label} className="text-center md:text-right">
@@ -809,8 +809,15 @@ function Testimonials() {
 function OurFleet() {
   const cars = [
     { name: 'Toyota Ertiga', slug: 'toyota-ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
+    { name: 'Toyota Ertiga', slug: 'toyota-ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
     { name: 'Toyota Innova', slug: 'toyota-innova', type: 'SUV · 7 Seater', desc: 'The gold standard in premium cab travel — powerful, plush, and perfect for long journeys.' },
-    { name: 'Hyundai Aura', slug: 'hyundai-aura', type: 'Sedan · 4 Seater', desc: 'Sleek and fuel-efficient sedan for comfortable airport transfers and city rides.' },
+    { name: 'Innova Crysta', slug: 'innova-crysta', type: 'SUV · 7 Seater', desc: 'Premium variant of the Innova with superior interiors and ride comfort for discerning travellers.' },
+    { name: 'Sedan', slug: 'sedan', type: 'Sedan · 4 Seater', desc: 'Sleek and fuel-efficient sedan for comfortable airport transfers and city rides.' },
+    { name: 'Toofan (Non-AC)', slug: 'toofan-non-ac', type: 'Van · 8 Seater', desc: 'Rugged and economical van — perfect for group travel on a budget without compromising on space.' },
+    { name: 'Toofan (AC)', slug: 'toofan-ac', type: 'Van · 8 Seater', desc: 'Air-conditioned Toofan for comfortable group journeys in all seasons across Gujarat.' },
+    { name: 'Tempo Traveller', slug: 'tempo-traveller', type: 'Minivan · 12–17 Seater', desc: 'The ultimate choice for large group travel — spacious, comfortable, and built for long routes.' },
+    { name: 'Bus', slug: 'bus', type: 'Bus · 20–50 Seater', desc: 'Full-size buses for corporate trips, school excursions, and large group pilgrimages across India.' },
+    { name: 'Urbania', slug: 'urbania', type: 'Luxury Van · 17 Seater', desc: 'Force Urbania — a luxury coach with premium seating for a first-class group travel experience.' },
   ];
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -1007,24 +1014,30 @@ function Contact() {
               {/* Car Type Selector */}
               <div className="flex flex-col gap-2 mb-5 md:mb-6">
                 <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Car Type</label>
-                <div className="grid grid-cols-3 gap-2 md:gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {([
-                    { value: 'Toyota Ertiga', label: 'Ertiga', icon: <Car size={15} /> },
-                    { value: 'Toyota Innova', label: 'Innova', icon: <Car size={15} /> },
-                    { value: 'Hyundai Aura', label: 'Aura', icon: <Car size={15} /> },
-                  ] as { value: string; label: string; icon: React.ReactNode }[]).map((opt) => (
+                    { value: 'Toyota Ertiga', label: 'Ertiga' },
+                    { value: 'Toyota Innova', label: 'Innova' },
+                    { value: 'Innova Crysta', label: 'Crysta' },
+                    { value: 'Sedan', label: 'Sedan' },
+                    { value: 'Toofan (Non-AC)', label: 'Toofan Non-AC' },
+                    { value: 'Toofan (AC)', label: 'Toofan AC' },
+                    { value: 'Tempo Traveller', label: 'Tempo' },
+                    { value: 'Bus', label: 'Bus' },
+                    { value: 'Urbania', label: 'Urbania' },
+                  ] as { value: string; label: string }[]).map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, carType: opt.value })}
-                      className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded text-[9px] tracking-[1.5px] uppercase font-medium transition-all duration-300 border ${
+                      className={`flex items-center justify-center gap-1.5 py-2.5 px-1 rounded text-[9px] tracking-[1px] uppercase font-medium transition-all duration-300 border ${
                         formData.carType === opt.value
                           ? 'bg-red border-red text-white'
                           : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
                       }`}
                     >
-                      {opt.icon}
-                      <span className="leading-none">{opt.label}</span>
+                      <Car size={11} />
+                      <span className="leading-none truncate">{opt.label}</span>
                     </button>
                   ))}
                 </div>
