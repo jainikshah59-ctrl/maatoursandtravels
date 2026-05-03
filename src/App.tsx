@@ -241,7 +241,7 @@ function Hero() {
       <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
         {[
           { num: '10+', label: 'Years of Trust' },
-          { num: '5K+', label: 'Happy Travellers' },
+          { num: '10K+', label: 'Happy Travellers' },
           { num: '50+', label: 'Destinations' },
         ].map((stat) => (
           <div key={stat.label} className="text-center md:text-right">
