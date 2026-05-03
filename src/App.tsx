@@ -177,13 +177,21 @@ function Navbar() {
 }
 
 /* ─── Hero ─── */
-function Hero() {
+function Hero({ splashDone }: { splashDone: boolean }) {
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (splashDone && heroVideoRef.current) {
+      heroVideoRef.current.play().catch(() => {});
+    }
+  }, [splashDone]);
+
   return (
     <section id="home" className="relative min-h-[100dvh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <video
+  ref={heroVideoRef}
   src="/videos/hero_travel.mp4"
-  autoPlay
   muted
   loop
   playsInline
@@ -1319,7 +1327,7 @@ function App() {
           style={{ width: progress + '%' }}
         />
         <Navbar />
-        <Hero />
+        <Hero splashDone={splashDone} />
         <Marquee />
         <Destinations />
         <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
