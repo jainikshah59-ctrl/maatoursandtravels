@@ -1069,53 +1069,34 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleLoaded = () => {
-      setVideoLoaded(true);
-    };
-
-    const handleEnded = () => {
-      // Start fade out when video ends
-      setIsFading(true);
-      // Remove from DOM after fade completes (2.5s fade)
-      setTimeout(onComplete, 2500);
-    };
+    const handleLoaded = () => setVideoLoaded(true);
 
     video.addEventListener('loadeddata', handleLoaded);
-    video.addEventListener('ended', handleEnded);
 
-    // Auto-skip after 10 seconds if video is still playing
-    const timeout = setTimeout(() => {
-      if (!video.paused) {
-        setIsFading(true);
-        setTimeout(onComplete, 2500);
-      }
-    }, 10000);
+    // Start fade out at 4 seconds, remove from DOM after fade (0.8s)
+    const fadeTimeout = setTimeout(() => {
+      setIsFading(true);
+      setTimeout(onComplete, 800);
+    }, 4000);
 
     return () => {
       video.removeEventListener('loadeddata', handleLoaded);
-      video.removeEventListener('ended', handleEnded);
-      clearTimeout(timeout);
+      clearTimeout(fadeTimeout);
     };
   }, [onComplete]);
 
-  const handleSkip = () => {
-    setIsFading(true);
-    setTimeout(onComplete, 2500);
-  };
-
   return (
-    <div 
-      className={`fixed inset-0 z-[9999] bg-black flex items-center justify-center ${isFading ? 'pointer-events-none' : ''}`}
+    <div
+      className="fixed inset-0 z-[9999] bg-black pointer-events-none"
       style={{
         opacity: isFading ? 0 : 1,
-        transition: 'opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
-      {/* Video with smooth scale animation on load */}
-      <div 
+      <div
         className="absolute inset-0"
         style={{
-          transform: videoLoaded ? 'scale(1)' : 'scale(1.1)',
+          transform: videoLoaded ? 'scale(1)' : 'scale(1.05)',
           transition: 'transform 3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
@@ -1128,44 +1109,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
           className="w-full h-full object-cover"
         />
       </div>
-
-      {/* Dark overlay that fades with the video */}
-      <div 
-        className="absolute inset-0 bg-black/20"
-        style={{
-          opacity: isFading ? 0 : 1,
-          transition: 'opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-      />
-
-      {/* Skip button - fades out with splash */}
-      <button
-        onClick={handleSkip}
-        className="absolute bottom-8 right-8 md:bottom-12 md:right-12 text-white/70 hover:text-white text-[10px] md:text-[11px] tracking-[3px] uppercase transition-all duration-500 flex items-center gap-2 group"
-        style={{
-          opacity: isFading ? 0 : 1,
-          transform: isFading ? 'translateY(10px)' : 'translateY(0)',
-          transition: 'opacity 1.5s ease, transform 1.5s ease',
-        }}
-      >
-        <span className="w-8 h-[1px] bg-white/30 group-hover:bg-red transition-colors" />
-        Skip Intro
-      </button>
-
-      {/* Logo overlay - fades out with splash */}
-      <div 
-        className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 md:gap-3"
-        style={{
-          opacity: isFading ? 0 : 1,
-          transform: isFading ? 'translateY(-10px)' : 'translateY(0)',
-          transition: 'opacity 1.5s ease, transform 1.5s ease',
-        }}
-      >
-        <img src="/images/logo.jpg" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
-        <span className="font-playfair text-base md:text-xl text-white tracking-wide">
-          Maa <span className="text-red">Travels</span>
-        </span>
-      </div>
+      <div className="absolute inset-0 bg-black/20" />
     </div>
   );
 }
