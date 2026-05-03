@@ -750,7 +750,8 @@ function Contact() {
     name: '',
     pickup: '',
     drop: '',
-    datetime: ''
+    date: '',
+    time: ''
   });
 
   const cities = [
@@ -775,7 +776,8 @@ function Contact() {
 *Name:* ${formData.name}
 *Pickup:* ${formData.pickup}
 *Drop:* ${formData.drop}
-*Date and Time:* ${formData.datetime}`;
+*Date:* ${formData.date}
+*Time:* ${formData.time}`;
     const encodedMsg = encodeURIComponent(msg);
     window.open(`https://wa.me/919558050710?text=${encodedMsg}`, '_blank');
   };
@@ -864,16 +866,29 @@ function Contact() {
                     ))}
                   </select>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date &amp; Time</label>
-                  <input 
-                    type="datetime-local" 
-                    name="datetime"
-                    value={formData.datetime}
-                    onChange={handleChange}
-                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
-                    required 
-                  />
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date</label>
+                    <input 
+                      type="date" 
+                      name="date"
+                      value={formData.date}
+                      onChange={handleChange}
+                      className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Time</label>
+                    <input 
+                      type="time" 
+                      name="time"
+                      value={formData.time}
+                      onChange={handleChange}
+                      className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                      required 
+                    />
+                  </div>
                 </div>
               </div>
 
