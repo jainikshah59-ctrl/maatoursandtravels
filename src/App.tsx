@@ -588,12 +588,14 @@ function Testimonials() {
   const allTestimonials = [...testimonials, ...testimonials];
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [scrollStart, setScrollStart] = useState(0);
   const resumeTimerRef = useRef<number | null>(null);
   const wasDraggingRef = useRef(false);
+  const animationRef = useRef<Animation | null>(null);
 
   const clearResumeTimer = () => {
     if (resumeTimerRef.current) {
@@ -609,6 +611,43 @@ function Testimonials() {
     }, 15000);
   };
 
+  // Start CSS animation when not paused
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    if (!isPaused) {
+      // Create or resume animation
+      const keyframes = [
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-50%)' }
+      ];
+      const options: KeyframeAnimationOptions = {
+        duration: 20000,
+        iterations: Infinity,
+        easing: 'linear'
+      };
+
+      if (animationRef.current) {
+        animationRef.current.play();
+      } else {
+        animationRef.current = track.animate(keyframes, options);
+      }
+    } else {
+      // Pause animation
+      if (animationRef.current) {
+        animationRef.current.pause();
+      }
+    }
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.cancel();
+        animationRef.current = null;
+      }
+    };
+  }, [isPaused]);
+
   const handleMouseEnter = () => {
     if (!isDragging) {
       setIsPaused(true);
@@ -623,22 +662,21 @@ function Testimonials() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!trackRef.current) return;
+    if (!containerRef.current) return;
     setIsDragging(true);
     setIsPaused(true);
     clearResumeTimer();
     wasDraggingRef.current = false;
-    setStartX(e.pageX - trackRef.current.offsetLeft);
-    setScrollLeft(trackRef.current.scrollLeft);
+    setStartX(e.pageX);
+    setScrollStart(containerRef.current.scrollLeft);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !trackRef.current) return;
+    if (!isDragging || !containerRef.current) return;
     e.preventDefault();
     wasDraggingRef.current = true;
-    const x = e.pageX - trackRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    trackRef.current.scrollLeft = scrollLeft - walk;
+    const walk = (e.pageX - startX) * 1.5;
+    containerRef.current.scrollLeft = scrollStart - walk;
   };
 
   const handleMouseUp = () => {
@@ -647,21 +685,20 @@ function Testimonials() {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!trackRef.current) return;
+    if (!containerRef.current) return;
     setIsDragging(true);
     setIsPaused(true);
     clearResumeTimer();
     wasDraggingRef.current = false;
-    setStartX(e.touches[0].pageX - trackRef.current.offsetLeft);
-    setScrollLeft(trackRef.current.scrollLeft);
+    setStartX(e.touches[0].pageX);
+    setScrollStart(containerRef.current.scrollLeft);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !trackRef.current) return;
+    if (!isDragging || !containerRef.current) return;
     wasDraggingRef.current = true;
-    const x = e.touches[0].pageX - trackRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    trackRef.current.scrollLeft = scrollLeft - walk;
+    const walk = (e.touches[0].pageX - startX) * 1.5;
+    containerRef.current.scrollLeft = scrollStart - walk;
   };
 
   const handleTouchEnd = () => {
@@ -680,6 +717,9 @@ function Testimonials() {
   useEffect(() => {
     return () => {
       clearResumeTimer();
+      if (animationRef.current) {
+        animationRef.current.cancel();
+      }
     };
   }, []);
 
@@ -695,8 +735,14 @@ function Testimonials() {
       </div>
 
       <div 
-        className="overflow-hidden"
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        ref={containerRef}
+        className="overflow-x-auto scrollbar-hide"
+        style={{ 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
@@ -709,12 +755,8 @@ function Testimonials() {
       >
         <div 
           ref={trackRef}
-          className="testi-track flex gap-4 md:gap-6"
-          style={{
-            width: 'max-content',
-            animation: isPaused ? 'none' : 'testiScroll 20s linear infinite',
-            animationPlayState: isPaused ? 'paused' : 'running'
-          }}
+          className="flex gap-4 md:gap-6"
+          style={{ width: 'max-content' }}
         >
           {allTestimonials.map((t, i) => (
             <div 
