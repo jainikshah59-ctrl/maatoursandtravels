@@ -1391,12 +1391,15 @@ function WhatsAppButton() {
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFading, setIsFading] = useState(false);
+  // videoReady = browser has enough data to start playing (≥1% downloaded)
   const [videoReady, setVideoReady] = useState(false);
   const doneRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const finish = () => {
     if (doneRef.current) return;
     doneRef.current = true;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsFading(true);
     setTimeout(() => {
       document.body.style.overflow = '';
@@ -1412,34 +1415,54 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleCanPlay = () => setVideoReady(true);
-    // Splash ends only when the video finishes naturally — no artificial timeout
-    const handleEnded = () => finish();
-    // Only bail on a hard network/decode error
-    const handleError = () => finish();
+    // 10-second safety net — if video never starts, open the site
+    timeoutRef.current = setTimeout(() => finish(), 10000);
 
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('ended', handleEnded);
-    video.addEventListener('error', handleError);
+    // `loadeddata` fires as soon as the first frame is decoded (~1% downloaded).
+    // This is earlier than `canplay` — perfect for "start as soon as anything arrives".
+    const handleLoadedData = () => {
+      setVideoReady(true);
+      video.play().catch(() => finish()); // autoplay blocked? just bail
+    };
+
+    const handleEnded = () => finish();
+    const handleError  = () => finish();
+
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('ended',      handleEnded);
+    video.addEventListener('error',      handleError);
 
     return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('ended', handleEnded);
-      video.removeEventListener('error', handleError);
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('ended',      handleEnded);
+      video.removeEventListener('error',      handleError);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       document.body.style.overflow = '';
     };
   }, []);
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-black"
       style={{
         opacity: isFading ? 0 : 1,
         transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: isFading ? 'none' : 'all',
       }}
     >
-      {/* Video plays once ready — logo shows instantly as fallback */}
+      {/* Static poster image — shown instantly, covers the screen until video takes over */}
+      <img
+        src="/videos/splash-poster.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          opacity: videoReady ? 0 : 1,
+          transition: 'opacity 0.5s ease',
+        }}
+      />
+
+      {/* Video — fades in the moment the first frame is ready */}
       <video
         ref={videoRef}
         src="/videos/splash.mp4"
@@ -1453,31 +1476,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
           transition: 'opacity 0.5s ease',
         }}
       />
-      <div className="absolute inset-0 bg-black/20" />
-
-      {/* Logo shown immediately — visible until/unless video takes over */}
-      <div
-        className="relative z-10 flex flex-col items-center gap-4"
-        style={{
-          opacity: videoReady ? 0 : 1,
-          transition: 'opacity 0.5s ease',
-          pointerEvents: 'none',
-        }}
-      >
-        <img src="/images/logo.jpg" alt="Maa Travels" className="h-20 w-auto rounded-xl shadow-2xl" />
-        <div className="font-playfair text-2xl text-white tracking-wide">
-          Maa <span className="text-red">Travels</span>
-        </div>
-        <div className="flex gap-1.5 mt-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-1.5 h-1.5 bg-red rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
