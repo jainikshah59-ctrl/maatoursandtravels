@@ -1166,7 +1166,7 @@ function Footer() {
           <div>
             <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Services</div>
             <ul className="flex flex-col gap-2 md:gap-3">
-              {['Tour Packages', 'Taxi Service', 'Flight Booking', 'Hotel Booking', 'Pilgrimage Tours', 'Corporate Travel'].map((item) => (
+              {['Tour Packages', 'Taxi Service', 'Airport Pick & Drop', 'Railway Pick & Drop', 'Pilgrimage Tours', 'Corporate Travel'].map((item) => (
                 <li key={item}>
                   <a href="#services" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
                     <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
