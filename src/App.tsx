@@ -148,7 +148,7 @@ function Navbar() {
       </div>
 
       {/* Mobile Nav */}
-      {menuOpen &amp;&amp; (
+      {menuOpen && (
         <div className="lg:hidden bg-black/95 backdrop-blur-xl border-t border-white/[0.08] px-6 py-6 max-h-[80vh] overflow-y-auto">
           <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (
@@ -223,7 +223,7 @@ function Hero() {
           </h1>
 
           <p className="text-[13px] md:text-[15px] text-white/60 leading-[1.8] max-w-[480px] mb-8 md:mb-10 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.4s' }}>
-            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal — we craft journeys that become memories for a lifetime.
+            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal - we craft journeys that become memories for a lifetime.
           </p>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.6s' }}>
@@ -286,12 +286,12 @@ function Marquee() {
 /* ─── Destinations ─── */
 function Destinations() {
   const destinations = [
-    { name: 'Saurashtra\nDarshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.png' },
-    { name: 'Rann of\nKutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.png' },
-    { name: 'Goa\nParadise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
-    { name: 'Himachal\nPradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.png' },
-    { name: 'Rajasthan\nRoyale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.png' },
-    { name: 'Gujarat\nSplendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.png' },
+    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.png' },
+    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.png' },
+    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.png' },
+    { name: 'Himachal Pradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.png' },
+    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.png' },
+    { name: 'Gujarat Splendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.png' },
   ];
 
   return (
@@ -375,11 +375,11 @@ function Destinations() {
 /* ─── Services ─── */
 function Services() {
   const services = [
-    { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes — designed around your dreams.', link: '#packages' },
+    { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes - designed around your dreams.', link: '#packages' },
     { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#contact' },
     { icon: <Plane size={22} />, title: 'Flight Ticket Booking', desc: 'Lowest fares on domestic and international flights. Special rates and exclusive deals you won\'t find anywhere else.', link: '#contact' },
     { icon: <Hotel size={22} />, title: 'Hotel Reservations', desc: 'Handpicked accommodations from budget-friendly stays to five-star luxury resorts. Verified, reliable, perfectly located.', link: '#contact' },
-    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond — reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
+    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
     { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#contact' },
   ];
 
@@ -399,7 +399,7 @@ function Services() {
               key={service.title}
               className={`service-card bg-[#0a0a0a] p-6 md:p-10 lg:p-12 relative overflow-hidden group transition-all duration-400 hover:bg-[#111] ${
                 i < services.length - 1 ? 'border-b border-white/[0.08]' : ''
-              } ${i % 2 === 0 &amp;&amp; i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
+              } ${i % 2 === 0 && i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
               <div className="relative z-10">
@@ -424,10 +424,10 @@ function Services() {
 function About() {
   const features = [
     { strong: '10+ Years', text: 'of industry expertise &amp; local knowledge' },
-    { strong: 'Safety First', text: '— sanitized vehicles, trained drivers, regular checks' },
-    { strong: 'Transparent Pricing', text: '— no hidden charges, ever' },
+    { strong: 'Safety First', text: '- sanitized vehicles, trained drivers, regular checks' },
+    { strong: 'Transparent Pricing', text: '- no hidden charges, ever' },
     { strong: 'Government &amp; Corporate', text: 'approved travel contracts' },
-    { strong: '24/7 Support', text: '— your ride is always just a call away' },
+    { strong: '24/7 Support', text: '- your ride is always just a call away' },
   ];
 
   return (
@@ -453,7 +453,7 @@ function About() {
               For over a decade, Maa Tour &amp; Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
             </p>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-6 md:mb-8">
-              Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service — because your dream holiday deserves nothing less than perfection.
+              Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service - because your dream holiday deserves nothing less than perfection.
             </p>
 
             <div className="flex flex-col gap-3 md:gap-4">
@@ -481,34 +481,31 @@ function Packages() {
     {
       img: '/images/himachal.png',
       dur: '4 Days',
-      route: 'Haridwar → Kedarnath → Return',
-      name: 'Char Dham
-Yatra Pilgrimage',
+      route: 'Haridwar -> Kedarnath -> Return',
+      name: 'Char Dham Yatra Pilgrimage',
       pax: 'Up to 6',
       vehicle: 'A/C Vehicle',
-      price: '₹8,500',
+      price: '8,500',
       featured: false,
     },
     {
       img: '/images/rajasthan.png',
       dur: '5 Days',
-      route: 'Bhuj → Jaipur → Jaisalmer → Udaipur',
-      name: 'Rajasthan
-Royal Heritage',
+      route: 'Bhuj -> Jaipur -> Jaisalmer -> Udaipur',
+      name: 'Rajasthan Royal Heritage',
       pax: 'Up to 6',
       vehicle: 'A/C Vehicle',
-      price: '₹9,500',
+      price: '9,500',
       featured: true,
     },
     {
       img: '/images/kerala.png',
       dur: '6 Days',
-      route: 'Kochi → Munnar → Alleppey → Kovalam',
-      name: 'Kerala
-Backwaters Bliss',
+      route: 'Kochi -> Munnar -> Alleppey -> Kovalam',
+      name: 'Kerala Backwaters Bliss',
       pax: 'Up to 6',
       vehicle: 'A/C Vehicle',
-      price: '₹10,500',
+      price: '10,500',
       featured: false,
     },
   ];
@@ -534,7 +531,7 @@ Backwaters Bliss',
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {packages.map((pkg, i) => (
             <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal-up reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
-              {pkg.featured &amp;&amp; (
+              {pkg.featured && (
                 <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10 bg-red text-black text-[8px] md:text-[9px] tracking-[2px] uppercase px-2.5 md:px-3 py-0.5 md:py-1 rounded-sm">
                   Popular
                 </div>
@@ -551,7 +548,7 @@ Backwaters Bliss',
               </div>
               <div className="p-4 md:p-6">
                 <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-2">{pkg.route}</div>
-                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal leading-tight text-white mb-3 md:mb-4 whitespace-pre-line">{pkg.name}</h3>
+                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal leading-tight text-white mb-3 md:mb-4">{pkg.name}</h3>
                 <div className="flex items-center gap-3 mb-4 md:mb-5">
                   <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax} Passengers</span>
                 </div>
@@ -579,11 +576,11 @@ Backwaters Bliss',
 function Testimonials() {
   const testimonials = [
     { stars: 5, text: '"Best trip destination knowledge, too much cooperative and honest, excellent service, driving skill excellent. Highly recommend to everyone."', name: 'Rajesh Mehta', loc: 'Bhuj, Gujarat', avatar: 'R' },
-    { stars: 5, text: '"Best service and best travel planner in Bhuj — all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
+    { stars: 5, text: '"Best service and best travel planner in Bhuj - all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
     { stars: 5, text: '"Very good service, enjoyed my trip a lot, cars are also good and completely satisfied with the driver. They deserve to be at the top."', name: 'Amit Patel', loc: 'Surat, Gujarat', avatar: 'A' },
     { stars: 5, text: '"Economical cost, friendly staff and drivers, affordable trip for family. Comfortable and suitable for any occasion. Absolutely loved every moment!"', name: 'Sunita Joshi', loc: 'Vadodara, Gujarat', avatar: 'S' },
     { stars: 5, text: '"Our Saurashtra darshan was perfectly planned. The driver was so knowledgeable about local temples and traditions. Truly a spiritual experience."', name: 'Deepak Trivedi', loc: 'Mumbai, Maharashtra', avatar: 'D' },
-    { stars: 5, text: '"They arranged our company's annual trip flawlessly — 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
+    { stars: 5, text: '"They arranged our company annual trip flawlessly - 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
     { stars: 5, text: '"The Kutch trip was magical. Sanitized car, professional driver, great hotel recommendations. Maa Tours truly made it once in a lifetime."', name: 'Mohan Desai', loc: 'Bhavnagar, Gujarat', avatar: 'M' },
     { stars: 5, text: '"Airport pickup was seamless, driver was on time and very polite. Baggage transfer was smooth. Will use Maa Tours for all my future travel needs."', name: 'Neha Chauhan', loc: 'Junagadh, Gujarat', avatar: 'N' },
   ];
@@ -607,7 +604,7 @@ function Testimonials() {
 
   const startResumeTimer = () => {
     clearResumeTimer();
-    resumeTimerRef.current = setTimeout(() => {
+    resumeTimerRef.current = window.setTimeout(() => {
       setIsPaused(false);
     }, 15000);
   };
@@ -712,7 +709,7 @@ function Testimonials() {
       >
         <div 
           ref={trackRef}
-          className="flex gap-4 md:gap-6"
+          className="testi-track flex gap-4 md:gap-6"
           style={{
             width: 'max-content',
             animation: isPaused ? 'none' : 'testiScroll 20s linear infinite',
@@ -722,8 +719,7 @@ function Testimonials() {
           {allTestimonials.map((t, i) => (
             <div 
               key={i} 
-              className="min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
-              onMouseDown={(e) => e.preventDefault()}
+              className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
             >
               <div className="flex gap-1 mb-3 md:mb-4">
                 {Array.from({ length: t.stars }).map((_, j) => (
@@ -797,7 +793,7 @@ function Contact() {
               Begin Your<br /><em>Journey</em><br />With Us Today
             </h2>
             <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-8 md:mb-10">
-              Whether you're planning a family holiday, a spiritual pilgrimage, a corporate retreat or simply need a reliable ride — we're here, ready to make it extraordinary.
+              Whether you're planning a family holiday, a spiritual pilgrimage, a corporate retreat or simply need a reliable ride - we're here, ready to make it extraordinary.
             </p>
 
             <div className="flex flex-col gap-3 md:gap-5">
@@ -912,7 +908,7 @@ function Footer() {
               {['Saurashtra', 'Kutch', 'Rajasthan', 'Himachal', 'Goa', 'Gujarat'].map((item) => (
                 <li key={item}>
                   <a href="#destinations" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
-                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
                     {item}
                   </a>
                 </li>
@@ -926,7 +922,7 @@ function Footer() {
               {['Tour Packages', 'Taxi Service', 'Flight Booking', 'Hotel Booking', 'Pilgrimage Tours', 'Corporate Travel'].map((item) => (
                 <li key={item}>
                   <a href="#services" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
-                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
                     {item}
                   </a>
                 </li>
@@ -940,7 +936,7 @@ function Footer() {
               {['About Us', 'Testimonials', 'Contact', 'WhatsApp Us'].map((item) => (
                 <li key={item}>
                   <a href={item === 'About Us' ? '#about' : item === 'Testimonials' ? '#testimonials' : item === 'Contact' ? '#contact' : '#contact'} className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
-                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">—</span>
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
                     {item}
                   </a>
                 </li>
@@ -984,6 +980,12 @@ function App() {
 
   return (
     <div className="bg-black text-white min-h-screen relative">
+      <style>{`
+        @keyframes testiScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
       <style>{`
         @keyframes testiScroll {
           0% { transform: translateX(0); }
