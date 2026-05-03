@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin, Car, Plane, Church, Building2,
   Phone, MessageCircle, Mail, MapPinned, Check,
@@ -895,22 +895,23 @@ function Contact() {
               <div className="flex flex-col gap-2 mb-5 md:mb-6">
                 <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Service Type</label>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
-                  {[
-                    { value: 'airport', label: '✈ Airport' },
-                    { value: 'railway', label: '🚂 Railway' },
-                    { value: 'outstation', label: '🚗 Outstation' },
-                  ].map((opt) => (
+                  {([
+                    { value: 'airport', label: 'Airport', icon: <Plane size={15} /> },
+                    { value: 'railway', label: 'Railway', icon: <MapPinned size={15} /> },
+                    { value: 'outstation', label: 'Outstation', icon: <Car size={15} /> },
+                  ] as { value: string; label: string; icon: React.ReactNode }[]).map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, serviceType: opt.value })}
-                      className={`py-2.5 md:py-3 px-2 rounded text-[10px] md:text-[11px] tracking-[1.5px] uppercase font-medium transition-all duration-300 border ${
+                      className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded text-[9px] tracking-[1.5px] uppercase font-medium transition-all duration-300 border ${
                         formData.serviceType === opt.value
                           ? 'bg-red border-red text-white'
                           : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
                       }`}
                     >
-                      {opt.label}
+                      {opt.icon}
+                      <span className="leading-none">{opt.label}</span>
                     </button>
                   ))}
                 </div>
