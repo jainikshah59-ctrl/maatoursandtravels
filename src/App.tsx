@@ -1056,16 +1056,7 @@ function App() {
       <Navbar />
       <Hero />
       
-      {/* Stats Section */}
-      <div className="bg-black py-8 md:py-12 px-4 md:px-8 lg:px-12">
-        <div className="max-w-[1400px] mx-auto flex flex-row md:flex-col justify-center items-center gap-6 md:gap-8">
-          {[
-            { num: '10+', label: 'Years of Trust' },
-            { num: '5K+', label: 'Happy Travellers' },
-            { num: '50+', label: 'Destinations' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="font-playfair text-[32px] md:text-[48px] font-light text-red leading-none">{stat.num}</div>
+      
               <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-1 md:mt-2">{stat.label}</div>
             </div>
           ))}
