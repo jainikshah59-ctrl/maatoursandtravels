@@ -5,6 +5,147 @@ import {
   ArrowRight, Star, Menu, X, ChevronRight, Users
 } from 'lucide-react';
 
+/* ─── Performance Boost ─── */
+function usePerformanceBoost() {
+  useEffect(() => {
+    // ── 1. Preload critical above-the-fold assets immediately ──
+    const criticalAssets = [
+      { href: '/videos/splash.mp4',      as: 'video' },
+      { href: '/videos/hero_travel.mp4', as: 'video' },
+      { href: '/images/logo.jpg',        as: 'image' },
+    ];
+    criticalAssets.forEach(({ href, as }) => {
+      if (document.querySelector(`link[href="${href}"]`)) return;
+      const link = document.createElement('link');
+      link.rel  = 'preload';
+      link.href = href;
+      link.as   = as;
+      if (as === 'video') link.setAttribute('type', 'video/mp4');
+      document.head.appendChild(link);
+    });
+
+    // ── 2. Prefetch below-the-fold images after a short idle delay ──
+    const belowFoldImages = [
+      '/images/saurashtra.png', '/images/kutch.png', '/images/goa.png',
+      '/images/himachal.png',   '/images/rajasthan.png', '/images/gujarat.png',
+    ];
+    const prefetchImages = () => {
+      belowFoldImages.forEach((href) => {
+        if (document.querySelector(`link[href="${href}"]`)) return;
+        const link = document.createElement('link');
+        link.rel  = 'prefetch';
+        link.href = href;
+        link.as   = 'image';
+        document.head.appendChild(link);
+      });
+    };
+    // Use requestIdleCallback when available, fallback to setTimeout
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(prefetchImages, { timeout: 2000 });
+    } else {
+      setTimeout(prefetchImages, 1500);
+    }
+
+    // ── 3. Lazy-load all non-critical images with IntersectionObserver ──
+    const lazyObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target as HTMLImageElement;
+          const dataSrc = img.getAttribute('data-src');
+          if (dataSrc) {
+            img.src = dataSrc;
+            img.removeAttribute('data-src');
+          }
+          lazyObserver.unobserve(img);
+        });
+      },
+      { rootMargin: '200px 0px' } // start loading 200px before entering viewport
+    );
+    // Observe any image that has a data-src attribute
+    document.querySelectorAll('img[data-src]').forEach((img) => lazyObserver.observe(img));
+
+    // ── 4. DNS-prefetch & preconnect for any external origins ──
+    const externalOrigins = [
+      { href: 'https://fonts.googleapis.com',  rel: 'preconnect' },
+      { href: 'https://fonts.gstatic.com',     rel: 'preconnect', crossOrigin: true },
+      { href: 'https://wa.me',                 rel: 'dns-prefetch' },
+    ];
+    externalOrigins.forEach(({ href, rel, crossOrigin }) => {
+      if (document.querySelector(`link[href="${href}"]`)) return;
+      const link = document.createElement('link');
+      link.rel  = rel;
+      link.href = href;
+      if (crossOrigin) link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    });
+
+    // ── 5. Cache static assets in a Service Worker (if supported) ──
+    if ('serviceWorker' in navigator) {
+      // Inline SW as a Blob so no separate sw.js file is needed
+      const swCode = `
+        const CACHE = 'maa-travels-v1';
+        const PRECACHE = [
+          '/images/logo.jpg',
+          '/images/saurashtra.png',
+          '/images/kutch.png',
+          '/images/goa.png',
+          '/images/himachal.png',
+          '/images/rajasthan.png',
+          '/images/gujarat.png',
+        ];
+
+        self.addEventListener('install', (e) => {
+          e.waitUntil(
+            caches.open(CACHE).then((cache) => cache.addAll(PRECACHE))
+          );
+          self.skipWaiting();
+        });
+
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then((keys) =>
+              Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+            )
+          );
+          self.clients.claim();
+        });
+
+        self.addEventListener('fetch', (e) => {
+          // Only cache GET requests for same-origin assets
+          if (e.request.method !== 'GET') return;
+          const url = new URL(e.request.url);
+          if (url.origin !== location.origin) return;
+
+          e.respondWith(
+            caches.match(e.request).then((cached) => {
+              if (cached) return cached;
+              return fetch(e.request).then((response) => {
+                // Cache images and videos on first fetch
+                if (
+                  response.ok &&
+                  (e.request.url.match(/\\.(png|jpg|jpeg|webp|mp4|svg)$/))
+                ) {
+                  const clone = response.clone();
+                  caches.open(CACHE).then((cache) => cache.put(e.request, clone));
+                }
+                return response;
+              });
+            })
+          );
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(() => {
+        // SW registration failed silently — site still works fine
+      });
+    }
+
+    return () => lazyObserver.disconnect();
+  }, []);
+}
+
 /* ─── Scroll Progress Hook ─── */
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -1251,15 +1392,12 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     window.scrollTo(0, 0);
 
     const video = videoRef.current;
-
-    // Hard cap: dismiss splash after 4 seconds no matter what
-    const hardCap = setTimeout(finish, 4000);
-
-    if (!video) return () => clearTimeout(hardCap);
+    if (!video) return;
 
     const handleCanPlay = () => setVideoReady(true);
+    // Splash ends only when the video finishes naturally — no artificial timeout
     const handleEnded = () => finish();
-    // If video errors or stalls, bail out immediately
+    // Only bail on a hard network/decode error
     const handleError = () => finish();
 
     video.addEventListener('canplay', handleCanPlay);
@@ -1267,7 +1405,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     video.addEventListener('error', handleError);
 
     return () => {
-      clearTimeout(hardCap);
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('error', handleError);
@@ -1331,6 +1468,7 @@ function App() {
   const [splashDone, setSplashDone] = useState(false);
   const progress = useScrollProgress();
   useReveal();
+  usePerformanceBoost();
 
   return (
     <>
