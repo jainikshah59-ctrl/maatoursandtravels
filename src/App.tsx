@@ -223,7 +223,7 @@ function Hero() {
           </h1>
 
           <p className="text-[13px] md:text-[15px] text-white/60 leading-[1.8] max-w-[480px] mb-8 md:mb-10 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.4s' }}>
-            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal - we craft journeys that become memories for a lifetime.
+            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal — we craft journeys that become memories for a lifetime.
           </p>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.6s' }}>
@@ -232,18 +232,12 @@ function Hero() {
                 Explore Packages
               </span>
             </a>
+            
           </div>
         </div>
       </div>
 
-      {/* Stats - positioned at bottom right */}
-      
-            <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-0.5 md:mt-1">{stat.label}</div>
-          </div>
-        ))}
       </div>
-
-      
     </section>
   );
 }
