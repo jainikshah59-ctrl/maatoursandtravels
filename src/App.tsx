@@ -1751,7 +1751,7 @@ function TripJourneyView({ tripKey, onBack, color }: { tripKey: string; onBack: 
           <div className="text-[11px] tracking-[2px] uppercase mt-0.5" style={{ color }}>{trip.tag} · {trip.duration}</div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          {stops.map((s, i) => (
+          {stops.map((_s, i) => (
             <button
               key={i}
               onClick={() => {
