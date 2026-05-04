@@ -1794,7 +1794,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                   <div
                     className="absolute -inset-4 rounded-full opacity-40"
                     style={{
-                      background: `radial-gradient(circle, ${color}44 0%, transparent 70%)`,
+                      background: `radial-gradient(circle, ${trip.color}44 0%, transparent 70%)`,
                       animation: 'carGlow 1s ease-in-out infinite alternate',
                     }}
                   />
