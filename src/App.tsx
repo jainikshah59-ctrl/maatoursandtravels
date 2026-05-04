@@ -460,11 +460,11 @@ function Marquee() {
 /* ─── Destinations ─── */
 function Destinations() {
   const destinations = [
-    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.', img: '/images/saurashtra.webp' },
-    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: 'The world\'s largest salt desert shimmers under the moonlight.', img: '/images/kutch.webp' },
-    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.', img: '/images/goa.webp' },
+    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: "Ancient temples, folk traditions and artistic heritage of Gujarat's heartland.", img: '/images/saurashtra.webp' },
+    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: "The world's largest salt desert shimmers under the moonlight.", img: '/images/kutch.webp' },
+    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: "Endless beaches and vibrant nightlife on India's sunny coast.", img: '/images/goa.webp' },
     { name: 'Himachal Pradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.webp' },
-    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: 'Palaces, forts and golden sands of India\'s most regal state.', img: '/images/rajasthan.webp' },
+    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: "Palaces, forts and golden sands of India's most regal state.", img: '/images/rajasthan.webp' },
     { name: 'Gujarat Splendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.webp' },
   ];
 
@@ -584,7 +584,7 @@ function Services() {
     { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#booking' },
     { icon: <Plane size={22} />, title: 'Airport Pick & Drop', desc: 'Punctual, comfortable airport transfers to and from all major airports. Flight tracking, meet & greet, and zero waiting stress.', link: '#booking' },
     { icon: <MapPin size={22} />, title: 'Railway Station Pick & Drop', desc: 'Reliable pickup and drop service to all major railway stations. On-time arrivals, luggage assistance, and hassle-free rides.', link: '#booking' },
-    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: 'Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India\'s most sacred destinations, planned with devotion.', link: '#packages' },
+    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: "Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India's most sacred destinations, planned with devotion.", link: '#packages' },
     { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#booking' },
   ];
 
@@ -1425,7 +1425,6 @@ function Footer() {
   );
 }
 
-
 /* ─── AI Trip Planner ─── */
 
 const TRIP_DATA: Record<string, {
@@ -1440,14 +1439,14 @@ const TRIP_DATA: Record<string, {
   'Saurashtra Darshan': {
     name: 'Saurashtra Darshan',
     tag: 'Cultural Heritage',
-    desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat's heartland.',
+    desc: "Ancient temples, folk traditions and artistic heritage of Gujarat's heartland.",
     img: '/images/saurashtra.webp',
     color: '#e8a020',
     duration: '5 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Bhuj is the cultural heart of Kutch. Known for its magnificent Aina Mahal palace, Prag Mahal, and vibrant handicraft markets. The perfect starting point for your Saurashtra adventure.', km: '0 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: "Bhuj is the cultural heart of Kutch. Known for its magnificent Aina Mahal palace, Prag Mahal, and vibrant handicraft markets. The perfect starting point for your Saurashtra adventure.", km: '0 km' },
       { name: 'Morbi', img: '/images/gujarat.webp', emoji: '🕰️', info: '70 km from Bhuj', detail: 'Famous for wall clocks and ceramic tiles. Visit the ornate Waghji Bridge and the restored Green Chowk palace.', km: '70 km' },
-      { name: 'Rajkot', img: '/images/saurashtra.webp', emoji: '🌆', info: '120 km from Morbi', detail: 'The cultural capital of Saurashtra. Birthplace of Mahatma Gandhi's early education. Explore Kaba Gandhi No Delo and Watson Museum.', km: '190 km' },
+      { name: 'Rajkot', img: '/images/saurashtra.webp', emoji: '🌆', info: '120 km from Morbi', detail: "The cultural capital of Saurashtra. Birthplace of Mahatma Gandhi's early education. Explore Kaba Gandhi No Delo and Watson Museum.", km: '190 km' },
       { name: 'Junagadh', img: '/images/saurashtra.webp', emoji: '🦁', info: '100 km from Rajkot', detail: 'Gateway to Gir Forest and home to Uparkot Fort. The Mahabat Maqbara has stunning Indo-Gothic architecture.', km: '290 km' },
       { name: 'Somnath', img: '/images/saurashtra.webp', emoji: '⛩️', info: '85 km from Junagadh', detail: 'One of the 12 Jyotirlingas, Somnath Temple stands majestically on the Arabian Sea coast. A spiritually profound destination.', km: '375 km' },
     ],
@@ -1455,7 +1454,7 @@ const TRIP_DATA: Record<string, {
   'Rann of Kutch': {
     name: 'Rann of Kutch',
     tag: 'Desert Wonder',
-    desc: 'The world's largest salt desert shimmers under the moonlight.',
+    desc: "The world's largest salt desert shimmers under the moonlight.",
     img: '/images/kutch.webp',
     color: '#c4a46b',
     duration: '3 Days',
@@ -1469,7 +1468,7 @@ const TRIP_DATA: Record<string, {
   'Goa Paradise': {
     name: 'Goa Paradise',
     tag: 'Beach & Sun',
-    desc: 'Endless beaches and vibrant nightlife on India's sunny coast.',
+    desc: "Endless beaches and vibrant nightlife on India's sunny coast.",
     img: '/images/goa.webp',
     color: '#2196a0',
     duration: '6 Days',
@@ -1477,7 +1476,7 @@ const TRIP_DATA: Record<string, {
       { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Depart from Bhuj and start your coastal adventure. Comfortable vehicle, refreshments on board and scenic highway views.', km: '0 km' },
       { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '330 km from Bhuj', detail: 'A UNESCO heritage city — explore Sabarmati Ashram, Adalaj Stepwell and the vibrant old city.', km: '330 km' },
       { name: 'Surat', img: '/images/gujarat.webp', emoji: '💎', info: '270 km from Ahmedabad', detail: 'Diamond capital of the world. Visit Dumas beach and try the legendary Surti street food.', km: '600 km' },
-      { name: 'Mumbai', img: '/images/goa.webp', emoji: '🌆', info: '290 km from Surat', detail: 'The city of dreams. See Gateway of India, Marine Drive and enjoy Mumbai's legendary street food.', km: '890 km' },
+      { name: 'Mumbai', img: '/images/goa.webp', emoji: '🌆', info: '290 km from Surat', detail: "The city of dreams. See Gateway of India, Marine Drive and enjoy Mumbai's legendary street food.", km: '890 km' },
       { name: 'Goa', img: '/images/goa.webp', emoji: '🏖️', info: '590 km from Mumbai', detail: 'Paradise found. Pristine beaches, Portuguese churches, spice plantations and legendary sunsets.', km: '1480 km' },
     ],
   },
@@ -1498,13 +1497,13 @@ const TRIP_DATA: Record<string, {
   'Rajasthan Royale': {
     name: 'Rajasthan Royale',
     tag: 'Royal Legacy',
-    desc: 'Palaces, forts and golden sands of India's most regal state.',
+    desc: "Palaces, forts and golden sands of India's most regal state.",
     img: '/images/rajasthan.webp',
     color: '#e8542a',
     duration: '7 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Start from Bhuj, the historic capital of Kutch. The city's rich heritage sets the tone for a royal journey ahead.', km: '0 km' },
-      { name: 'Barmer', img: '/images/rajasthan.webp', emoji: '🏜️', info: '190 km from Bhuj', detail: 'The gateway to Rajasthan's Thar Desert. Visit the ancient Kiradu Temples and colorful bazaars.', km: '190 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: "Start from Bhuj, the historic capital of Kutch. The city's rich heritage sets the tone for a royal journey ahead.", km: '0 km' },
+      { name: 'Barmer', img: '/images/rajasthan.webp', emoji: '🏜️', info: '190 km from Bhuj', detail: "The gateway to Rajasthan's Thar Desert. Visit the ancient Kiradu Temples and colorful bazaars.", km: '190 km' },
       { name: 'Jaisalmer', img: '/images/rajasthan.webp', emoji: '🏰', info: '150 km from Barmer', detail: 'The Golden City rising from the Thar Desert. The living fort, Patwon Ki Haveli and Sam Sand Dunes.', km: '340 km' },
       { name: 'Jodhpur', img: '/images/rajasthan.webp', emoji: '💙', info: '290 km from Jaisalmer', detail: 'The Blue City dominated by mighty Mehrangarh Fort. Blue-washed lanes and vibrant Sardar Market.', km: '630 km' },
       { name: 'Udaipur', img: '/images/rajasthan.webp', emoji: '🛶', info: '250 km from Jodhpur', detail: 'The City of Lakes. Lake Pichola shimmering at sunset with City Palace reflecting in its waters.', km: '880 km' },
@@ -1519,11 +1518,11 @@ const TRIP_DATA: Record<string, {
     color: '#7c3aed',
     duration: '5 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Kutch's magnificent capital. The hand-crafted textiles, Prag Mahal palace and the old city walled lanes.', km: '0 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: "Kutch's magnificent capital. The hand-crafted textiles, Prag Mahal palace and the old city walled lanes.", km: '0 km' },
       { name: 'Dwarka', img: '/images/gujarat.webp', emoji: '🐚', info: '300 km from Bhuj', detail: 'One of the four sacred Dhams of Hinduism. The Dwarkadhish Temple stands magnificent on the banks of Gomti River.', km: '300 km' },
       { name: 'Gir Forest', img: '/images/gujarat.webp', emoji: '🦁', info: '150 km from Dwarka', detail: 'The last refuge of Asiatic lions. Safari through lush Gir to spot lions, leopards, deer and over 300 bird species.', km: '450 km' },
       { name: 'Palitana', img: '/images/gujarat.webp', emoji: '⛩️', info: '170 km from Gir', detail: 'Climb 3,800 steps to reach 863 Jain temples atop Shatrunjaya Hill — a breathtaking spiritual experience.', km: '620 km' },
-      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '220 km from Palitana', detail: 'India's first UNESCO World Heritage City. Sabarmati Ashram, the walled city pols and legendary Gujarati thali.', km: '840 km' },
+      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '220 km from Palitana', detail: "India's first UNESCO World Heritage City. Sabarmati Ashram, the walled city pols and legendary Gujarati thali.", km: '840 km' },
     ],
   },
 };
@@ -1542,23 +1541,16 @@ function CarSVG({ color, direction = 'right' }: { color: string; direction?: 'le
   const scaleX = direction === 'left' ? -1 : 1;
   return (
     <svg width="64" height="36" viewBox="0 0 64 36" fill="none" style={{ filter: `drop-shadow(0 4px 12px ${color}aa)`, transform: `scaleX(${scaleX})` }}>
-      {/* Car body */}
       <rect x="4" y="14" width="56" height="16" rx="6" fill={color} />
-      {/* Car top */}
       <path d="M14 14 L20 4 L44 4 L50 14 Z" fill={color} opacity="0.9" />
-      {/* Windows */}
       <path d="M22 6 L28 6 L28 12 L18 12 Z" fill="rgba(180,230,255,0.6)" />
       <path d="M32 6 L42 6 L46 12 L32 12 Z" fill="rgba(180,230,255,0.6)" />
-      {/* Wheels */}
       <circle cx="16" cy="28" r="6" fill="#1a1a1a" />
       <circle cx="16" cy="28" r="3" fill="#333" />
       <circle cx="48" cy="28" r="6" fill="#1a1a1a" />
       <circle cx="48" cy="28" r="3" fill="#333" />
-      {/* Headlight */}
       <rect x="56" y="16" width="6" height="5" rx="2" fill="rgba(255,240,150,0.9)" />
-      {/* Taillight */}
       <rect x="2" y="16" width="4" height="5" rx="1" fill="rgba(255,80,80,0.8)" />
-      {/* Bumper detail */}
       <rect x="8" y="26" width="48" height="2" rx="1" fill="rgba(0,0,0,0.2)" />
     </svg>
   );
@@ -1604,7 +1596,7 @@ function StopMarker({ active, done, color, number }: { active: boolean; done: bo
 function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => void }) {
   const trip = TRIP_DATA[tripKey];
   const [currentStop, setCurrentStop] = useState(0);
-  const [carPosition, setCarPosition] = useState(0); // 0 to 100
+  const [carPosition, setCarPosition] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const [showInfo, setShowInfo] = useState(true);
   const [infoVisible, setInfoVisible] = useState(true);
@@ -1637,7 +1629,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
     }, 1000);
   };
 
-  // Smooth car animation using requestAnimationFrame
   const moveCarToStop = (targetStopIndex: number) => {
     clearAllTimers();
     setIsMoving(true);
@@ -1646,18 +1637,15 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
 
     const startPos = ((targetStopIndex - 1) / (totalStops - 1)) * 100;
     const endPos = (targetStopIndex / (totalStops - 1)) * 100;
-    const duration = 2500; // 2.5 seconds for smooth travel
+    const duration = 2500;
     const startTime = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Ease in-out cubic for super smooth movement
-      const eased = progress < 0.5 
-        ? 4 * progress * progress * progress 
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
       const currentPos = startPos + (endPos - startPos) * eased;
       setCarPosition(currentPos);
 
@@ -1669,7 +1657,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
         setIsMoving(false);
         setShowInfo(true);
         setTimeout(() => setInfoVisible(true), 100);
-
         if (targetStopIndex < totalStops - 1) {
           startCountdown(() => moveCarToStop(targetStopIndex + 1));
         }
@@ -1679,7 +1666,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
     animFrameRef.current = requestAnimationFrame(animate);
   };
 
-  // Start journey on mount
   useEffect(() => {
     setCarPosition(0);
     setCurrentStop(0);
@@ -1691,7 +1677,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
 
   const stop = stops[currentStop];
 
-  // Calculate car direction based on movement
   const getCarDirection = (): 'left' | 'right' => {
     if (currentStop === 0) return 'right';
     if (isMoving) return 'right';
@@ -1702,8 +1687,8 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
     <div className="flex flex-col h-full overflow-hidden bg-[#0a0a0f]">
       {/* ===== HEADER ===== */}
       <div className="flex items-center gap-4 px-6 py-4 border-b border-white/[0.06] bg-[#0a0a0f]/80 backdrop-blur-xl flex-shrink-0">
-        <button 
-          onClick={onBack} 
+        <button
+          onClick={onBack}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300 border border-white/[0.1]"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -1713,7 +1698,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
         <div className="flex-1">
           <div className="font-playfair text-white text-xl md:text-2xl">{trip.name}</div>
           <div className="text-[11px] tracking-[2.5px] uppercase mt-0.5" style={{ color: trip.color }}>
-            {trip.tag} · {trip.duration} · {totalStops} Stops
+            {trip.tag} &middot; {trip.duration} &middot; {totalStops} Stops
           </div>
         </div>
         <div className="hidden md:flex items-center gap-2">
@@ -1750,7 +1735,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
 
         {/* --- ROAD SECTION --- */}
         <div className="relative flex-shrink-0 px-6 md:px-12 py-8 md:py-10">
-          {/* Road background */}
           <div className="relative h-[100px] md:h-[120px] rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)' }}>
             {/* Road surface */}
             <div className="absolute inset-x-4 md:inset-x-8 top-1/2 -translate-y-1/2 h-[50px] md:h-[60px] rounded-xl" style={{ background: 'linear-gradient(180deg, #252538 0%, #1a1a2e 100%)', border: '2px solid rgba(255,255,255,0.08)' }}>
@@ -1760,7 +1744,6 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                   <div key={i} className="w-6 h-[2px] bg-white/20 flex-shrink-0" />
                 ))}
               </div>
-              {/* Road edge lines */}
               <div className="absolute inset-x-0 top-0 h-[1px] bg-white/10" />
               <div className="absolute inset-x-0 bottom-0 h-[1px] bg-white/10" />
             </div>
@@ -1775,15 +1758,15 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                     className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1"
                     style={{ left: `${leftPercent}%`, transform: 'translate(-50%, -50%)' }}
                   >
-                    <StopMarker 
-                      active={i === currentStop} 
-                      done={i < currentStop} 
-                      color={trip.color} 
-                      number={i + 1} 
+                    <StopMarker
+                      active={i === currentStop}
+                      done={i < currentStop}
+                      color={trip.color}
+                      number={i + 1}
                     />
-                    <span 
+                    <span
                       className="text-[9px] md:text-[10px] tracking-wider uppercase whitespace-nowrap mt-1 transition-all duration-300"
-                      style={{ 
+                      style={{
                         color: i <= currentStop ? 'white' : 'rgba(255,255,255,0.25)',
                         fontWeight: i === currentStop ? 600 : 400,
                       }}
@@ -1807,28 +1790,26 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
             >
               <div className="relative">
                 <CarSVG color={trip.color} direction={getCarDirection()} />
-                {/* Car glow */}
                 {isMoving && (
-                  <div 
+                  <div
                     className="absolute -inset-4 rounded-full opacity-40"
-                    style={{ 
-                      background: `radial-gradient(circle, ${trip.color}44 0%, transparent 70%)`,
+                    style={{
+                      background: `radial-gradient(circle, ${color}44 0%, transparent 70%)`,
                       animation: 'carGlow 1s ease-in-out infinite alternate',
                     }}
                   />
                 )}
-                {/* Dust particles when moving */}
                 {isMoving && (
                   <div className="absolute -left-6 top-1/2 -translate-y-1/2 flex gap-1">
                     {[0, 1, 2].map((i) => (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         className="w-1.5 h-1.5 rounded-full"
-                        style={{ 
+                        style={{
                           background: trip.color,
                           opacity: 0.6 - i * 0.15,
                           animation: `carDust 0.6s ease-in-out ${i * 0.12}s infinite`,
-                        }} 
+                        }}
                       />
                     ))}
                   </div>
@@ -1837,7 +1818,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
             </div>
 
             {/* Traveled road overlay */}
-            <div 
+            <div
               className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 h-[50px] md:h-[60px] rounded-l-xl"
               style={{
                 width: `calc(${carPosition}% * (100% - 32px) / 100)`,
@@ -1853,12 +1834,12 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
           {/* Progress bar below road */}
           <div className="mt-3 flex items-center gap-3">
             <div className="flex-1 h-[3px] rounded-full bg-white/[0.06] overflow-hidden">
-              <div 
+              <div
                 className="h-full rounded-full transition-all duration-100"
-                style={{ 
-                  width: `${carPosition}%`, 
+                style={{
+                  width: `${carPosition}%`,
                   background: `linear-gradient(90deg, ${trip.color}, ${trip.color}88)`,
-                }} 
+                }}
               />
             </div>
             <span className="text-[10px] text-white/40 tracking-wider">{Math.round(carPosition)}%</span>
@@ -1885,18 +1866,13 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     style={{ filter: 'brightness(0.7)' }}
                   />
-                  {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                  {/* Stop badge */}
-                  <div 
+                  <div
                     className="absolute top-4 left-4 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider uppercase"
                     style={{ background: trip.color, color: 'white' }}
                   >
                     Stop {currentStop + 1} of {totalStops}
                   </div>
-
-                  {/* City name overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <div className="text-4xl mb-1">{stop.emoji}</div>
                     <h2 className="font-playfair text-3xl md:text-4xl text-white">{stop.name}</h2>
@@ -1907,7 +1883,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
 
               {/* RIGHT: Stop Info */}
               <div className="flex flex-col justify-center">
-                <div 
+                <div
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] tracking-wider uppercase font-semibold w-fit mb-4"
                   style={{ background: `${trip.color}18`, color: trip.color, border: `1px solid ${trip.color}33` }}
                 >
@@ -1945,7 +1921,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                           <div className="text-white font-medium">{stops[currentStop + 1].name}</div>
                           <div className="text-[11px] text-white/40">{stops[currentStop + 1].info}</div>
                         </div>
-                        <div 
+                        <div
                           className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
                           style={{ background: `${trip.color}22`, color: trip.color, border: `2px solid ${trip.color}44` }}
                         >
@@ -1958,13 +1934,13 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
                       className="px-5 py-4 rounded-xl text-[11px] tracking-wider uppercase font-semibold text-white transition-all hover:opacity-80 flex-shrink-0"
                       style={{ background: trip.color }}
                     >
-                      Skip →
+                      Skip &rarr;
                     </button>
                   </div>
                 )}
 
                 {currentStop === totalStops - 1 && (
-                  <div 
+                  <div
                     className="p-5 rounded-xl text-center"
                     style={{
                       background: `linear-gradient(135deg, ${trip.color}18 0%, ${trip.color}08 100%)`,
@@ -1990,7 +1966,7 @@ function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => v
           {/* Moving indicator */}
           {isMoving && (
             <div className="flex items-center justify-center h-full">
-              <div 
+              <div
                 className="flex items-center gap-3 px-6 py-3 rounded-full"
                 style={{ background: 'rgba(0,0,0,0.6)', border: `1px solid ${trip.color}44` }}
               >
