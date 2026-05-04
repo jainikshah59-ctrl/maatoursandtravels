@@ -1562,7 +1562,6 @@ function App() {
         <OurFleet />
         <Contact />
         <Footer />
-        <AiTripPlanner />
         <WhatsAppButton />
       </div>
     </>
