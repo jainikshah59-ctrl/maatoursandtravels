@@ -1425,6 +1425,7 @@ function Footer() {
   );
 }
 
+
 /* ─── AI Trip Planner ─── */
 
 const TRIP_DATA: Record<string, {
@@ -1439,14 +1440,14 @@ const TRIP_DATA: Record<string, {
   'Saurashtra Darshan': {
     name: 'Saurashtra Darshan',
     tag: 'Cultural Heritage',
-    desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat\'s heartland.',
+    desc: 'Ancient temples, folk traditions and artistic heritage of Gujarat's heartland.',
     img: '/images/saurashtra.webp',
     color: '#e8a020',
     duration: '5 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Start from Bhuj, the cultural heart of Kutch. Known for its magnificent Aina Mahal palace and vibrant handicraft markets.', km: '0 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Bhuj is the cultural heart of Kutch. Known for its magnificent Aina Mahal palace, Prag Mahal, and vibrant handicraft markets. The perfect starting point for your Saurashtra adventure.', km: '0 km' },
       { name: 'Morbi', img: '/images/gujarat.webp', emoji: '🕰️', info: '70 km from Bhuj', detail: 'Famous for wall clocks and ceramic tiles. Visit the ornate Waghji Bridge and the restored Green Chowk palace.', km: '70 km' },
-      { name: 'Rajkot', img: '/images/saurashtra.webp', emoji: '🌆', info: '120 km from Morbi', detail: 'The cultural capital of Saurashtra. Birthplace of Mahatma Gandhi\'s early education. Explore Kaba Gandhi No Delo and Watson Museum.', km: '190 km' },
+      { name: 'Rajkot', img: '/images/saurashtra.webp', emoji: '🌆', info: '120 km from Morbi', detail: 'The cultural capital of Saurashtra. Birthplace of Mahatma Gandhi's early education. Explore Kaba Gandhi No Delo and Watson Museum.', km: '190 km' },
       { name: 'Junagadh', img: '/images/saurashtra.webp', emoji: '🦁', info: '100 km from Rajkot', detail: 'Gateway to Gir Forest and home to Uparkot Fort. The Mahabat Maqbara has stunning Indo-Gothic architecture.', km: '290 km' },
       { name: 'Somnath', img: '/images/saurashtra.webp', emoji: '⛩️', info: '85 km from Junagadh', detail: 'One of the 12 Jyotirlingas, Somnath Temple stands majestically on the Arabian Sea coast. A spiritually profound destination.', km: '375 km' },
     ],
@@ -1454,30 +1455,30 @@ const TRIP_DATA: Record<string, {
   'Rann of Kutch': {
     name: 'Rann of Kutch',
     tag: 'Desert Wonder',
-    desc: 'The world\'s largest salt desert shimmers under the moonlight.',
+    desc: 'The world's largest salt desert shimmers under the moonlight.',
     img: '/images/kutch.webp',
     color: '#c4a46b',
     duration: '3 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Bhuj is the gateway to Kutch. Explore the iconic Prag Mahal, Aina Mahal and the bustling old city bazaars before heading out.', km: '0 km' },
-      { name: 'Bhujodi Village', img: '/images/kutch.webp', emoji: '🧵', info: '7 km from Bhuj', detail: 'Famous for weaving and crafts. Watch artisans create intricate Kutchi textiles on traditional looms. A paradise for handicraft lovers.', km: '7 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Bhuj is the gateway to Kutch. Explore the iconic Prag Mahal, Aina Mahal and the bustling old city bazaars before heading out.', km: '0 km' },
+      { name: 'Bhujodi Village', img: '/images/kutch.webp', emoji: '🧵', info: '7 km from Bhuj', detail: 'Famous for weaving and crafts. Watch artisans create intricate Kutchi textiles on traditional looms.', km: '7 km' },
       { name: 'Dholavira', img: '/images/kutch.webp', emoji: '🏛️', info: '250 km from Bhujodi', detail: 'One of the largest Harappan archaeological sites. A UNESCO World Heritage Site with stunning 5000-year-old urban planning.', km: '257 km' },
-      { name: 'White Rann', img: '/images/kutch.webp', emoji: '🌕', info: '150 km from Dholavira', detail: 'The Great Rann of Kutch — endless white salt flats that transform into a mirror under moonlight. An ethereal, unforgettable landscape.', km: '407 km' },
+      { name: 'White Rann', img: '/images/kutch.webp', emoji: '🌕', info: '150 km from Dholavira', detail: 'The Great Rann of Kutch — endless white salt flats that transform into a mirror under moonlight.', km: '407 km' },
     ],
   },
   'Goa Paradise': {
     name: 'Goa Paradise',
     tag: 'Beach & Sun',
-    desc: 'Endless beaches and vibrant nightlife on India\'s sunny coast.',
+    desc: 'Endless beaches and vibrant nightlife on India's sunny coast.',
     img: '/images/goa.webp',
     color: '#2196a0',
     duration: '6 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Depart from Bhuj and start your coastal adventure. Comfortable vehicle, refreshments on board and scenic highway views.', km: '0 km' },
-      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '330 km from Bhuj', detail: 'A UNESCO heritage city — explore the iconic Sabarmati Ashram, Adalaj Stepwell and the vibrant old city of Ahmedabad.', km: '330 km' },
-      { name: 'Surat', img: '/images/gujarat.webp', emoji: '💎', info: '270 km from Ahmedabad', detail: 'Diamond capital of the world. Visit the Dutch & English cemeteries, Dumas beach and try the legendary Surti street food.', km: '600 km' },
-      { name: 'Mumbai', img: '/images/goa.webp', emoji: '🌆', info: '290 km from Surat', detail: 'The city of dreams. See Gateway of India, Marine Drive and enjoy Mumbai\'s legendary street food before the final coastal stretch.', km: '890 km' },
-      { name: 'Goa', img: '/images/goa.webp', emoji: '🏖️', info: '590 km from Mumbai', detail: 'Paradise found. Pristine beaches, Portuguese churches, spice plantations and legendary sunsets. Baga, Anjuna and Palolem await you.', km: '1480 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Depart from Bhuj and start your coastal adventure. Comfortable vehicle, refreshments on board and scenic highway views.', km: '0 km' },
+      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '330 km from Bhuj', detail: 'A UNESCO heritage city — explore Sabarmati Ashram, Adalaj Stepwell and the vibrant old city.', km: '330 km' },
+      { name: 'Surat', img: '/images/gujarat.webp', emoji: '💎', info: '270 km from Ahmedabad', detail: 'Diamond capital of the world. Visit Dumas beach and try the legendary Surti street food.', km: '600 km' },
+      { name: 'Mumbai', img: '/images/goa.webp', emoji: '🌆', info: '290 km from Surat', detail: 'The city of dreams. See Gateway of India, Marine Drive and enjoy Mumbai's legendary street food.', km: '890 km' },
+      { name: 'Goa', img: '/images/goa.webp', emoji: '🏖️', info: '590 km from Mumbai', detail: 'Paradise found. Pristine beaches, Portuguese churches, spice plantations and legendary sunsets.', km: '1480 km' },
     ],
   },
   'Himachal Pradesh': {
@@ -1488,26 +1489,26 @@ const TRIP_DATA: Record<string, {
     color: '#4a9eff',
     duration: '8 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Start the Himalayan adventure from Bhuj. Long but scenic highway drive northward through Gujarat and Rajasthan.', km: '0 km' },
-      { name: 'Chandigarh', img: '/images/himachal.webp', emoji: '🌳', info: '1,200 km from Bhuj', detail: 'The city beautiful, designed by Le Corbusier. Explore Rock Garden, Sukhna Lake and the famous Rose Garden before entering the hills.', km: '1200 km' },
-      { name: 'Shimla', img: '/images/himachal.webp', emoji: '🏔️', info: '115 km from Chandigarh', detail: 'Former summer capital of British India. Ride the historic toy train, stroll The Mall Road and enjoy panoramic Himalayan views.', km: '1315 km' },
-      { name: 'Manali', img: '/images/himachal.webp', emoji: '❄️', info: '270 km from Shimla', detail: 'Gateway to the Himalayas. Solang Valley snow, Rohtang Pass, Hadimba Temple and the stunning Beas River valley await you.', km: '1585 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Start the Himalayan adventure from Bhuj. Long but scenic highway drive northward through Gujarat and Rajasthan.', km: '0 km' },
+      { name: 'Chandigarh', img: '/images/himachal.webp', emoji: '🌳', info: '1,200 km from Bhuj', detail: 'The city beautiful, designed by Le Corbusier. Explore Rock Garden, Sukhna Lake and the famous Rose Garden.', km: '1200 km' },
+      { name: 'Shimla', img: '/images/himachal.webp', emoji: '🏔️', info: '115 km from Chandigarh', detail: 'Former summer capital of British India. Ride the historic toy train and stroll The Mall Road.', km: '1315 km' },
+      { name: 'Manali', img: '/images/himachal.webp', emoji: '❄️', info: '270 km from Shimla', detail: 'Gateway to the Himalayas. Solang Valley snow, Rohtang Pass, Hadimba Temple and the stunning Beas River valley.', km: '1585 km' },
     ],
   },
   'Rajasthan Royale': {
     name: 'Rajasthan Royale',
     tag: 'Royal Legacy',
-    desc: 'Palaces, forts and golden sands of India\'s most regal state.',
+    desc: 'Palaces, forts and golden sands of India's most regal state.',
     img: '/images/rajasthan.webp',
     color: '#e8542a',
     duration: '7 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Start from Bhuj, the historic capital of Kutch. The city\'s rich heritage sets the tone for a royal journey ahead.', km: '0 km' },
-      { name: 'Barmer', img: '/images/rajasthan.webp', emoji: '🏜️', info: '190 km from Bhuj', detail: 'The gateway to Rajasthan\'s Thar Desert. Visit the ancient Kiradu Temples and the colorful Barmer bazaars selling traditional block-printed textiles.', km: '190 km' },
-      { name: 'Jaisalmer', img: '/images/rajasthan.webp', emoji: '🏰', info: '150 km from Barmer', detail: 'The Golden City rising from the Thar Desert. The living fort, Patwon Ki Haveli and Sam Sand Dunes at sunset will leave you breathless.', km: '340 km' },
-      { name: 'Jodhpur', img: '/images/rajasthan.webp', emoji: '💙', info: '290 km from Jaisalmer', detail: 'The Blue City dominated by the mighty Mehrangarh Fort. Blue-washed lanes of Brahmpuri, the vibrant Sardar Market and clock tower.', km: '630 km' },
-      { name: 'Udaipur', img: '/images/rajasthan.webp', emoji: '🛶', info: '250 km from Jodhpur', detail: 'The City of Lakes. Lake Pichola shimmering at sunset with City Palace reflecting in its waters is a moment of pure magic.', km: '880 km' },
-      { name: 'Jaipur', img: '/images/rajasthan.webp', emoji: '🌸', info: '390 km from Udaipur', detail: 'The Pink City — Amber Fort, Hawa Mahal, Jantar Mantar. The royal grandeur of Rajasthan culminates in this magnificent capital.', km: '1270 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Start from Bhuj, the historic capital of Kutch. The city's rich heritage sets the tone for a royal journey ahead.', km: '0 km' },
+      { name: 'Barmer', img: '/images/rajasthan.webp', emoji: '🏜️', info: '190 km from Bhuj', detail: 'The gateway to Rajasthan's Thar Desert. Visit the ancient Kiradu Temples and colorful bazaars.', km: '190 km' },
+      { name: 'Jaisalmer', img: '/images/rajasthan.webp', emoji: '🏰', info: '150 km from Barmer', detail: 'The Golden City rising from the Thar Desert. The living fort, Patwon Ki Haveli and Sam Sand Dunes.', km: '340 km' },
+      { name: 'Jodhpur', img: '/images/rajasthan.webp', emoji: '💙', info: '290 km from Jaisalmer', detail: 'The Blue City dominated by mighty Mehrangarh Fort. Blue-washed lanes and vibrant Sardar Market.', km: '630 km' },
+      { name: 'Udaipur', img: '/images/rajasthan.webp', emoji: '🛶', info: '250 km from Jodhpur', detail: 'The City of Lakes. Lake Pichola shimmering at sunset with City Palace reflecting in its waters.', km: '880 km' },
+      { name: 'Jaipur', img: '/images/rajasthan.webp', emoji: '🌸', info: '390 km from Udaipur', detail: 'The Pink City — Amber Fort, Hawa Mahal, Jantar Mantar. The royal grandeur of Rajasthan culminates here.', km: '1270 km' },
     ],
   },
   'Gujarat Splendour': {
@@ -1518,11 +1519,11 @@ const TRIP_DATA: Record<string, {
     color: '#7c3aed',
     duration: '5 Days',
     stops: [
-      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Your journey begins', detail: 'Kutch\'s magnificent capital. The hand-crafted textiles, Prag Mahal palace and the old city walled lanes are just the beginning.', km: '0 km' },
-      { name: 'Dwarka', img: '/images/gujarat.webp', emoji: '🐚', info: '300 km from Bhuj', detail: 'One of the four sacred Dhams of Hinduism. The Dwarkadhish Temple stands magnificent on the banks of the Gomti River.', km: '300 km' },
-      { name: 'Gir Forest', img: '/images/gujarat.webp', emoji: '🦁', info: '150 km from Dwarka', detail: 'The last refuge of Asiatic lions. Safari through lush Gir to spot lions, leopards, deer and over 300 species of birds.', km: '450 km' },
-      { name: 'Palitana', img: '/images/gujarat.webp', emoji: '⛩️', info: '170 km from Gir', detail: 'The world\'s only city declared vegetarian. Climb 3,800 steps to reach 863 Jain temples atop Shatrunjaya Hill — breathtaking.', km: '620 km' },
-      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '220 km from Palitana', detail: 'End in India\'s first UNESCO World Heritage City. Sabarmati Ashram, the walled city pols and legendary Gujarati thali await you.', km: '840 km' },
+      { name: 'Bhuj', img: '/images/kutch.webp', emoji: '🏙️', info: 'Journey Starts Here', detail: 'Kutch's magnificent capital. The hand-crafted textiles, Prag Mahal palace and the old city walled lanes.', km: '0 km' },
+      { name: 'Dwarka', img: '/images/gujarat.webp', emoji: '🐚', info: '300 km from Bhuj', detail: 'One of the four sacred Dhams of Hinduism. The Dwarkadhish Temple stands magnificent on the banks of Gomti River.', km: '300 km' },
+      { name: 'Gir Forest', img: '/images/gujarat.webp', emoji: '🦁', info: '150 km from Dwarka', detail: 'The last refuge of Asiatic lions. Safari through lush Gir to spot lions, leopards, deer and over 300 bird species.', km: '450 km' },
+      { name: 'Palitana', img: '/images/gujarat.webp', emoji: '⛩️', info: '170 km from Gir', detail: 'Climb 3,800 steps to reach 863 Jain temples atop Shatrunjaya Hill — a breathtaking spiritual experience.', km: '620 km' },
+      { name: 'Ahmedabad', img: '/images/gujarat.webp', emoji: '🕌', info: '220 km from Palitana', detail: 'India's first UNESCO World Heritage City. Sabarmati Ashram, the walled city pols and legendary Gujarati thali.', km: '840 km' },
     ],
   },
 };
@@ -1536,92 +1537,62 @@ const ALL_TRIPS = [
   { key: 'Gujarat Splendour', name: 'Gujarat Splendour', tag: 'Jain Heritage', img: '/images/gujarat.webp', duration: '5 Days', color: '#7c3aed' },
 ];
 
-/* Road SVG path for car animation */
-function RoadPath({ color, progress }: { color: string; progress: number }) {
-  // Simple S-curve road path
-  const pathD = "M 60 520 C 60 480, 120 460, 150 420 C 180 380, 120 340, 150 300 C 180 260, 240 250, 270 210 C 300 170, 260 130, 300 90 C 330 60, 390 55, 420 40";
-  const totalLen = 520;
-  const drawn = totalLen * progress;
-
+/* ===== CAR SVG ===== */
+function CarSVG({ color, direction = 'right' }: { color: string; direction?: 'left' | 'right' }) {
+  const scaleX = direction === 'left' ? -1 : 1;
   return (
-    <svg viewBox="0 0 480 560" className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
-      {/* Road shadow */}
-      <path d={pathD} fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Road base */}
-      <path d={pathD} fill="none" stroke="#1a1a2e" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Road surface */}
-      <path d={pathD} fill="none" stroke="#2d2d3a" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Road traveled */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke={color}
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeDasharray={`${drawn} ${totalLen}`}
-        style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1)' }}
-        opacity="0.8"
-      />
-      {/* Dashed center line */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke="rgba(255,255,255,0.15)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeDasharray="12 10"
-        strokeDashoffset="0"
-      />
+    <svg width="64" height="36" viewBox="0 0 64 36" fill="none" style={{ filter: `drop-shadow(0 4px 12px ${color}aa)`, transform: `scaleX(${scaleX})` }}>
+      {/* Car body */}
+      <rect x="4" y="14" width="56" height="16" rx="6" fill={color} />
+      {/* Car top */}
+      <path d="M14 14 L20 4 L44 4 L50 14 Z" fill={color} opacity="0.9" />
+      {/* Windows */}
+      <path d="M22 6 L28 6 L28 12 L18 12 Z" fill="rgba(180,230,255,0.6)" />
+      <path d="M32 6 L42 6 L46 12 L32 12 Z" fill="rgba(180,230,255,0.6)" />
+      {/* Wheels */}
+      <circle cx="16" cy="28" r="6" fill="#1a1a1a" />
+      <circle cx="16" cy="28" r="3" fill="#333" />
+      <circle cx="48" cy="28" r="6" fill="#1a1a1a" />
+      <circle cx="48" cy="28" r="3" fill="#333" />
+      {/* Headlight */}
+      <rect x="56" y="16" width="6" height="5" rx="2" fill="rgba(255,240,150,0.9)" />
+      {/* Taillight */}
+      <rect x="2" y="16" width="4" height="5" rx="1" fill="rgba(255,80,80,0.8)" />
+      {/* Bumper detail */}
+      <rect x="8" y="26" width="48" height="2" rx="1" fill="rgba(0,0,0,0.2)" />
     </svg>
   );
 }
 
-/* Animated car SVG */
-function CarIcon({ color }: { color: string }) {
+/* ===== STOP MARKER ===== */
+function StopMarker({ active, done, color, number }: { active: boolean; done: boolean; color: string; number: number }) {
   return (
-    <svg viewBox="0 0 40 24" width="40" height="24" style={{ filter: `drop-shadow(0 4px 8px ${color}88)` }}>
-      <rect x="2" y="8" width="36" height="12" rx="4" fill={color} />
-      <rect x="7" y="3" width="22" height="9" rx="3" fill={color} opacity="0.85" />
-      <rect x="9" y="5" width="8" height="5" rx="1.5" fill="rgba(180,230,255,0.7)" />
-      <rect x="21" y="5" width="8" height="5" rx="1.5" fill="rgba(180,230,255,0.7)" />
-      <circle cx="10" cy="20" r="4" fill="#111" />
-      <circle cx="10" cy="20" r="2" fill="#333" />
-      <circle cx="30" cy="20" r="4" fill="#111" />
-      <circle cx="30" cy="20" r="2" fill="#333" />
-      <rect x="33" y="10" width="5" height="3" rx="1" fill="rgba(255,240,100,0.9)" />
-      <rect x="2" y="10" width="4" height="3" rx="1" fill="rgba(255,80,80,0.8)" />
-    </svg>
-  );
-}
-
-/* Stop pin marker */
-function StopPin({ active, done, color }: { active: boolean; done: boolean; color: string }) {
-  return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{
-        width: 32, height: 32,
-        borderRadius: '50%',
-        background: done ? color : active ? `${color}22` : 'rgba(255,255,255,0.05)',
-        border: `2px solid ${active || done ? color : 'rgba(255,255,255,0.15)'}`,
-        transition: 'all 0.6s cubic-bezier(0.34,1.56,0.64,1)',
-        transform: active ? 'scale(1.3)' : 'scale(1)',
-        boxShadow: active ? `0 0 20px ${color}88` : 'none',
-      }}
-    >
-      {done ? (
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 7l4 4 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ) : (
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: active ? color : 'rgba(255,255,255,0.3)', transition: 'all 0.4s ease' }} />
-      )}
+    <div className="relative flex flex-col items-center">
+      <div
+        className="flex items-center justify-center rounded-full transition-all duration-500"
+        style={{
+          width: active ? 44 : 32,
+          height: active ? 44 : 32,
+          background: done ? color : active ? `${color}22` : 'rgba(255,255,255,0.06)',
+          border: `2.5px solid ${done ? color : active ? color : 'rgba(255,255,255,0.15)'}`,
+          boxShadow: active ? `0 0 24px ${color}66, 0 0 48px ${color}22` : 'none',
+          transform: active ? 'scale(1.15)' : 'scale(1)',
+        }}
+      >
+        {done ? (
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8l4 4 6-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <span className="text-white text-[11px] font-bold">{number}</span>
+        )}
+      </div>
       {active && (
         <div
           className="absolute inset-0 rounded-full"
           style={{
             border: `2px solid ${color}`,
-            animation: 'tripPing 1.4s ease-out infinite',
+            animation: 'stopPulse 1.8s ease-out infinite',
           }}
         />
       )}
@@ -1629,314 +1600,384 @@ function StopPin({ active, done, color }: { active: boolean; done: boolean; colo
   );
 }
 
-function TripJourneyView({ tripKey, onBack, color }: { tripKey: string; onBack: () => void; color: string }) {
+/* ===== TRIP JOURNEY VIEW ===== */
+function TripJourneyView({ tripKey, onBack }: { tripKey: string; onBack: () => void }) {
   const trip = TRIP_DATA[tripKey];
   const [currentStop, setCurrentStop] = useState(0);
-  const [carProgress, setCarProgress] = useState(0);
+  const [carPosition, setCarPosition] = useState(0); // 0 to 100
   const [isMoving, setIsMoving] = useState(false);
   const [showInfo, setShowInfo] = useState(true);
   const [infoVisible, setInfoVisible] = useState(true);
-  const [countDown, setCountDown] = useState(10);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [countDown, setCountDown] = useState(6);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const animFrameRef = useRef<number | null>(null);
 
   const stops = trip.stops;
-  const segmentSize = 1 / (stops.length - 1);
+  const totalStops = stops.length;
 
   const clearAllTimers = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
     if (countRef.current) clearInterval(countRef.current);
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
   };
 
   const startCountdown = (onDone: () => void) => {
     clearAllTimers();
-    setCountDown(10);
+    setCountDown(6);
     countRef.current = setInterval(() => {
       setCountDown((c) => {
         if (c <= 1) {
           clearAllTimers();
           onDone();
-          return 10;
+          return 6;
         }
         return c - 1;
       });
     }, 1000);
   };
 
-  const moveToStop = (nextIdx: number) => {
+  // Smooth car animation using requestAnimationFrame
+  const moveCarToStop = (targetStopIndex: number) => {
     clearAllTimers();
     setIsMoving(true);
     setShowInfo(false);
     setInfoVisible(false);
 
-    const targetProgress = nextIdx * segmentSize;
-    const startProgress = (nextIdx - 1) * segmentSize;
-    const steps = 60;
-    let step = 0;
+    const startPos = ((targetStopIndex - 1) / (totalStops - 1)) * 100;
+    const endPos = (targetStopIndex / (totalStops - 1)) * 100;
+    const duration = 2500; // 2.5 seconds for smooth travel
+    const startTime = performance.now();
 
-    const animate = () => {
-      step++;
-      const t = step / steps;
-      // Ease in-out cubic
-      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      const p = startProgress + (targetProgress - startProgress) * eased;
-      setCarProgress(p);
-      if (step < steps) {
-        timerRef.current = setTimeout(animate, 30) as any;
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Ease in-out cubic for super smooth movement
+      const eased = progress < 0.5 
+        ? 4 * progress * progress * progress 
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      const currentPos = startPos + (endPos - startPos) * eased;
+      setCarPosition(currentPos);
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
       } else {
-        setCarProgress(targetProgress);
-        setCurrentStop(nextIdx);
+        setCarPosition(endPos);
+        setCurrentStop(targetStopIndex);
         setIsMoving(false);
         setShowInfo(true);
-        setTimeout(() => setInfoVisible(true), 50);
-        if (nextIdx < stops.length - 1) {
-          startCountdown(() => moveToStop(nextIdx + 1));
+        setTimeout(() => setInfoVisible(true), 100);
+
+        if (targetStopIndex < totalStops - 1) {
+          startCountdown(() => moveCarToStop(targetStopIndex + 1));
         }
       }
     };
-    timerRef.current = setTimeout(animate, 30) as any;
+
+    animFrameRef.current = requestAnimationFrame(animate);
   };
 
-  // Start auto-journey
+  // Start journey on mount
   useEffect(() => {
-    setCarProgress(0);
+    setCarPosition(0);
     setCurrentStop(0);
     setShowInfo(true);
     setInfoVisible(true);
-    startCountdown(() => moveToStop(1));
+    startCountdown(() => moveCarToStop(1));
     return clearAllTimers;
   }, [tripKey]);
 
   const stop = stops[currentStop];
 
-  // Calculate car position on the SVG path (approximate waypoints)
-  const pathWaypoints = [
-    { x: 60, y: 520 },
-    { x: 90, y: 475 },
-    { x: 140, y: 440 },
-    { x: 165, y: 390 },
-    { x: 155, y: 345 },
-    { x: 165, y: 290 },
-    { x: 210, y: 255 },
-    { x: 265, y: 220 },
-    { x: 295, y: 175 },
-    { x: 275, y: 130 },
-    { x: 295, y: 90 },
-    { x: 340, y: 62 },
-    { x: 390, y: 48 },
-    { x: 420, y: 40 },
-  ];
-
-  const stopPositions = stops.map((_, i) => {
-    const idx = Math.round((i / (stops.length - 1)) * (pathWaypoints.length - 1));
-    return pathWaypoints[Math.min(idx, pathWaypoints.length - 1)];
-  });
-
-  const carWaypointIdx = Math.round(carProgress * (pathWaypoints.length - 1));
-  const carPos = pathWaypoints[Math.min(carWaypointIdx, pathWaypoints.length - 1)];
-  const carNextPos = pathWaypoints[Math.min(carWaypointIdx + 1, pathWaypoints.length - 1)];
-  const carAngle = carPos && carNextPos
-    ? Math.atan2(carPos.y - carNextPos.y, carNextPos.x - carPos.x) * (180 / Math.PI)
-    : 0;
+  // Calculate car direction based on movement
+  const getCarDirection = (): 'left' | 'right' => {
+    if (currentStop === 0) return 'right';
+    if (isMoving) return 'right';
+    return 'right';
+  };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 md:p-6 border-b border-white/[0.08]" style={{ background: 'rgba(0,0,0,0.6)' }}>
-        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors" style={{ border: '1px solid rgba(255,255,255,0.15)' }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    <div className="flex flex-col h-full overflow-hidden bg-[#0a0a0f]">
+      {/* ===== HEADER ===== */}
+      <div className="flex items-center gap-4 px-6 py-4 border-b border-white/[0.06] bg-[#0a0a0f]/80 backdrop-blur-xl flex-shrink-0">
+        <button 
+          onClick={onBack} 
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300 border border-white/[0.1]"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M11 3L6 9l5 6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
-        <div>
-          <div className="font-playfair text-white text-lg md:text-xl">{trip.name}</div>
-          <div className="text-[11px] tracking-[2px] uppercase mt-0.5" style={{ color }}>{trip.tag} · {trip.duration}</div>
+        <div className="flex-1">
+          <div className="font-playfair text-white text-xl md:text-2xl">{trip.name}</div>
+          <div className="text-[11px] tracking-[2.5px] uppercase mt-0.5" style={{ color: trip.color }}>
+            {trip.tag} · {trip.duration} · {totalStops} Stops
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           {stops.map((_s, i) => (
             <button
               key={i}
               onClick={() => {
                 clearAllTimers();
-                if (i <= currentStop) {
-                  setCurrentStop(i);
-                  setCarProgress(i * segmentSize);
-                  setShowInfo(true);
-                  setInfoVisible(true);
-                  if (i < stops.length - 1) startCountdown(() => moveToStop(i + 1));
+                const targetPos = (i / (totalStops - 1)) * 100;
+                setCarPosition(targetPos);
+                setCurrentStop(i);
+                setShowInfo(true);
+                setInfoVisible(true);
+                setIsMoving(false);
+                if (i < totalStops - 1) {
+                  startCountdown(() => moveCarToStop(i + 1));
                 }
               }}
-              className="hidden md:flex items-center justify-center text-[10px] font-medium rounded-full transition-all duration-300"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300"
               style={{
-                width: 28, height: 28,
-                background: i < currentStop ? color : i === currentStop ? `${color}33` : 'rgba(255,255,255,0.05)',
-                border: `1.5px solid ${i <= currentStop ? color : 'rgba(255,255,255,0.1)'}`,
+                background: i <= currentStop ? trip.color : 'rgba(255,255,255,0.05)',
                 color: i <= currentStop ? 'white' : 'rgba(255,255,255,0.3)',
+                border: `1.5px solid ${i <= currentStop ? trip.color : 'rgba(255,255,255,0.1)'}`,
               }}
             >
-              {i + 1}
+              {i < currentStop ? '✓' : i + 1}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+      {/* ===== MAIN CONTENT ===== */}
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Road Map Panel */}
-        <div className="w-full md:w-[300px] lg:w-[360px] flex-shrink-0 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0a0a14 0%, #111120 100%)' }}>
-          {/* Stars background */}
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.15) 0%, transparent 100%), radial-gradient(1px 1px at 100px 80px, rgba(255,255,255,0.1) 0%, transparent 100%), radial-gradient(1px 1px at 50px 150px, rgba(255,255,255,0.12) 0%, transparent 100%), radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.08) 0%, transparent 100%), radial-gradient(1px 1px at 170px 200px, rgba(255,255,255,0.1) 0%, transparent 100%)',
-          }} />
+        {/* --- ROAD SECTION --- */}
+        <div className="relative flex-shrink-0 px-6 md:px-12 py-8 md:py-10">
+          {/* Road background */}
+          <div className="relative h-[100px] md:h-[120px] rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)' }}>
+            {/* Road surface */}
+            <div className="absolute inset-x-4 md:inset-x-8 top-1/2 -translate-y-1/2 h-[50px] md:h-[60px] rounded-xl" style={{ background: 'linear-gradient(180deg, #252538 0%, #1a1a2e 100%)', border: '2px solid rgba(255,255,255,0.08)' }}>
+              {/* Center dashed line */}
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] flex items-center gap-3 px-4 overflow-hidden">
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <div key={i} className="w-6 h-[2px] bg-white/20 flex-shrink-0" />
+                ))}
+              </div>
+              {/* Road edge lines */}
+              <div className="absolute inset-x-0 top-0 h-[1px] bg-white/10" />
+              <div className="absolute inset-x-0 bottom-0 h-[1px] bg-white/10" />
+            </div>
 
-          {/* SVG Road */}
-          <div className="absolute inset-0 p-4">
-            <div className="relative w-full h-full">
-              <RoadPath color={color} progress={carProgress} />
-
-              {/* Stop pins */}
-              {stopPositions.map((pos, i) => (
-                <div
-                  key={i}
-                  className="absolute"
-                  style={{
-                    left: `${(pos.x / 480) * 100}%`,
-                    top: `${(pos.y / 560) * 100}%`,
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10,
-                  }}
-                >
-                  <StopPin active={i === currentStop} done={i < currentStop} color={color} />
+            {/* Stop markers on road */}
+            <div className="absolute inset-x-4 md:inset-x-8 top-1/2 -translate-y-1/2 flex justify-between items-center px-2">
+              {stops.map((s, i) => {
+                const leftPercent = (i / (totalStops - 1)) * 100;
+                return (
                   <div
-                    className="absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap text-[10px] font-medium transition-all duration-300"
-                    style={{
-                      color: i <= currentStop ? 'white' : 'rgba(255,255,255,0.3)',
-                      textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                    }}
+                    key={i}
+                    className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1"
+                    style={{ left: `${leftPercent}%`, transform: 'translate(-50%, -50%)' }}
                   >
-                    {stops[i].name}
+                    <StopMarker 
+                      active={i === currentStop} 
+                      done={i < currentStop} 
+                      color={trip.color} 
+                      number={i + 1} 
+                    />
+                    <span 
+                      className="text-[9px] md:text-[10px] tracking-wider uppercase whitespace-nowrap mt-1 transition-all duration-300"
+                      style={{ 
+                        color: i <= currentStop ? 'white' : 'rgba(255,255,255,0.25)',
+                        fontWeight: i === currentStop ? 600 : 400,
+                      }}
+                    >
+                      {s.name}
+                    </span>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+            </div>
 
-              {/* Animated Car */}
-              <div
-                className="absolute"
-                style={{
-                  left: `${(carPos.x / 480) * 100}%`,
-                  top: `${(carPos.y / 560) * 100}%`,
-                  transform: `translate(-50%, -50%) rotate(${carAngle}deg)`,
-                  zIndex: 20,
-                  transition: isMoving ? 'left 0.03s linear, top 0.03s linear' : 'all 0.4s ease',
-                }}
-              >
-                <CarIcon color={color} />
+            {/* Animated Car */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 z-20 transition-none"
+              style={{
+                left: `calc(4px + ${carPosition}% * calc(100% - 8px) / 100)`,
+                transform: 'translate(-50%, -50%)',
+                marginLeft: '16px',
+                marginRight: '16px',
+              }}
+            >
+              <div className="relative">
+                <CarSVG color={trip.color} direction={getCarDirection()} />
+                {/* Car glow */}
                 {isMoving && (
-                  <div className="absolute -left-3 top-1/2 -translate-y-1/2 flex gap-0.5">
+                  <div 
+                    className="absolute -inset-4 rounded-full opacity-40"
+                    style={{ 
+                      background: `radial-gradient(circle, ${trip.color}44 0%, transparent 70%)`,
+                      animation: 'carGlow 1s ease-in-out infinite alternate',
+                    }}
+                  />
+                )}
+                {/* Dust particles when moving */}
+                {isMoving && (
+                  <div className="absolute -left-6 top-1/2 -translate-y-1/2 flex gap-1">
                     {[0, 1, 2].map((i) => (
-                      <div key={i} className="w-1 h-1 rounded-full opacity-60" style={{ background: color, animation: `carDust 0.5s ease-in-out ${i * 0.1}s infinite` }} />
+                      <div 
+                        key={i} 
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ 
+                          background: trip.color,
+                          opacity: 0.6 - i * 0.15,
+                          animation: `carDust 0.6s ease-in-out ${i * 0.12}s infinite`,
+                        }} 
+                      />
                     ))}
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Traveled road overlay */}
+            <div 
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 h-[50px] md:h-[60px] rounded-l-xl"
+              style={{
+                width: `calc(${carPosition}% * (100% - 32px) / 100)`,
+                background: `linear-gradient(90deg, ${trip.color}22 0%, ${trip.color}08 100%)`,
+                borderLeft: `3px solid ${trip.color}`,
+                borderTop: `1px solid ${trip.color}44`,
+                borderBottom: `1px solid ${trip.color}44`,
+                transition: isMoving ? 'none' : 'width 0.5s ease',
+              }}
+            />
+          </div>
+
+          {/* Progress bar below road */}
+          <div className="mt-3 flex items-center gap-3">
+            <div className="flex-1 h-[3px] rounded-full bg-white/[0.06] overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-100"
+                style={{ 
+                  width: `${carPosition}%`, 
+                  background: `linear-gradient(90deg, ${trip.color}, ${trip.color}88)`,
+                }} 
+              />
+            </div>
+            <span className="text-[10px] text-white/40 tracking-wider">{Math.round(carPosition)}%</span>
           </div>
         </div>
 
-        {/* Info Panel */}
-        <div className="flex-1 overflow-y-auto relative" style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #111118 100%)' }}>
+        {/* --- INFO SECTION: Image Left + Info Right --- */}
+        <div className="flex-1 overflow-y-auto px-6 md:px-12 pb-8">
           {showInfo && stop && (
             <div
-              className="h-full flex flex-col"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 max-w-5xl mx-auto"
               style={{
                 opacity: infoVisible ? 1 : 0,
-                transform: infoVisible ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+                transform: infoVisible ? 'translateY(0)' : 'translateY(30px)',
+                transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.34,1.56,0.64,1)',
               }}
             >
-              {/* Place image */}
-              <div className="relative h-48 md:h-64 overflow-hidden flex-shrink-0">
-                <img
-                  src={stop.img}
-                  alt={stop.name}
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'brightness(0.65)' }}
-                />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #0d0d1a 100%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
-                  <div className="text-3xl mb-1">{stop.emoji}</div>
-                  <h2 className="font-playfair text-2xl md:text-3xl text-white">{stop.name}</h2>
-                  <div className="text-[11px] tracking-[2px] uppercase mt-1" style={{ color }}>{stop.info} · {stop.km}</div>
-                </div>
-                {/* Stop number badge */}
-                <div className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: color, color: 'white' }}>
-                  {currentStop + 1}/{stops.length}
+              {/* LEFT: Stop Image */}
+              <div className="relative rounded-2xl overflow-hidden group">
+                <div className="aspect-[4/3] relative">
+                  <img
+                    src={stop.img}
+                    alt={stop.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    style={{ filter: 'brightness(0.7)' }}
+                  />
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                  {/* Stop badge */}
+                  <div 
+                    className="absolute top-4 left-4 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider uppercase"
+                    style={{ background: trip.color, color: 'white' }}
+                  >
+                    Stop {currentStop + 1} of {totalStops}
+                  </div>
+
+                  {/* City name overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <div className="text-4xl mb-1">{stop.emoji}</div>
+                    <h2 className="font-playfair text-3xl md:text-4xl text-white">{stop.name}</h2>
+                    <div className="text-[11px] tracking-[2px] uppercase mt-1 text-white/60">{stop.info}</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Info content */}
-              <div className="p-5 md:p-7 flex-1">
-                <p className="text-white/70 text-[13px] md:text-sm leading-relaxed">{stop.detail}</p>
-
-                {/* All stops mini list */}
-                <div className="mt-6 space-y-2">
-                  <div className="text-[10px] tracking-[2px] uppercase text-white/30 mb-3">Journey Progress</div>
-                  {stops.map((s, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-300"
-                      style={{
-                        background: i === currentStop ? `${color}15` : 'transparent',
-                        border: `1px solid ${i === currentStop ? `${color}40` : 'transparent'}`,
-                      }}
-                    >
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{
-                          background: i < currentStop ? color : i === currentStop ? `${color}33` : 'rgba(255,255,255,0.05)',
-                          color: i <= currentStop ? 'white' : 'rgba(255,255,255,0.3)',
-                          border: `1.5px solid ${i <= currentStop ? color : 'rgba(255,255,255,0.1)'}`,
-                        }}
-                      >
-                        {i < currentStop ? '✓' : i + 1}
-                      </div>
-                      <div>
-                        <div className="text-[12px] font-medium" style={{ color: i === currentStop ? 'white' : i < currentStop ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)' }}>{s.name}</div>
-                        <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{s.km}</div>
-                      </div>
-                      {i === currentStop && !isMoving && i < stops.length - 1 && (
-                        <div className="ml-auto flex items-center gap-2">
-                          <div className="text-[11px]" style={{ color }}>Next in {countDown}s</div>
-                          <button
-                            onClick={() => { clearAllTimers(); moveToStop(currentStop + 1); }}
-                            className="px-2 py-1 rounded text-[10px] font-medium transition-all hover:opacity-80"
-                            style={{ background: color, color: 'white' }}
-                          >
-                            Skip →
-                          </button>
-                        </div>
-                      )}
-                      {i === currentStop && i === stops.length - 1 && (
-                        <div className="ml-auto text-[11px] font-medium" style={{ color }}>🎉 Arrived!</div>
-                      )}
-                    </div>
-                  ))}
+              {/* RIGHT: Stop Info */}
+              <div className="flex flex-col justify-center">
+                <div 
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] tracking-wider uppercase font-semibold w-fit mb-4"
+                  style={{ background: `${trip.color}18`, color: trip.color, border: `1px solid ${trip.color}33` }}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: trip.color, animation: 'pulse 2s infinite' }} />
+                  {isMoving ? 'Travelling...' : currentStop === totalStops - 1 ? 'Final Destination' : 'Currently Here'}
                 </div>
 
-                {/* Book CTA */}
-                {currentStop === stops.length - 1 && (
-                  <div
-                    className="mt-6 p-5 rounded-xl text-center"
+                <h3 className="font-playfair text-2xl md:text-3xl text-white mb-3">
+                  {currentStop === 0 ? 'Your Journey Begins' : `Welcome to ${stop.name}`}
+                </h3>
+
+                <p className="text-white/60 text-[14px] md:text-[15px] leading-[1.8] mb-6">
+                  {stop.detail}
+                </p>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="text-[10px] tracking-wider uppercase text-white/30 mb-1">Distance</div>
+                    <div className="text-white font-playfair text-lg">{stop.km}</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="text-[10px] tracking-wider uppercase text-white/30 mb-1">From Start</div>
+                    <div className="text-white font-playfair text-lg">{stop.km}</div>
+                  </div>
+                </div>
+
+                {/* Countdown or Arrived */}
+                {!isMoving && currentStop < totalStops - 1 && (
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-[10px] tracking-wider uppercase text-white/30 mb-2">Next Stop</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-white font-medium">{stops[currentStop + 1].name}</div>
+                          <div className="text-[11px] text-white/40">{stops[currentStop + 1].info}</div>
+                        </div>
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                          style={{ background: `${trip.color}22`, color: trip.color, border: `2px solid ${trip.color}44` }}
+                        >
+                          {countDown}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => { clearAllTimers(); moveCarToStop(currentStop + 1); }}
+                      className="px-5 py-4 rounded-xl text-[11px] tracking-wider uppercase font-semibold text-white transition-all hover:opacity-80 flex-shrink-0"
+                      style={{ background: trip.color }}
+                    >
+                      Skip →
+                    </button>
+                  </div>
+                )}
+
+                {currentStop === totalStops - 1 && (
+                  <div 
+                    className="p-5 rounded-xl text-center"
                     style={{
-                      background: `linear-gradient(135deg, ${color}22 0%, ${color}11 100%)`,
-                      border: `1px solid ${color}44`,
-                      animation: 'fadeInUp 0.6s ease',
+                      background: `linear-gradient(135deg, ${trip.color}18 0%, ${trip.color}08 100%)`,
+                      border: `1px solid ${trip.color}33`,
                     }}
                   >
-                    <div className="text-white font-playfair text-lg mb-1">Ready for {trip.name}?</div>
-                    <div className="text-white/50 text-[12px] mb-4">{trip.duration} · Starting from Bhuj</div>
+                    <div className="text-2xl mb-2">🎉</div>
+                    <div className="text-white font-playfair text-xl mb-1">Journey Complete!</div>
+                    <div className="text-white/50 text-[12px] mb-4">You have reached your final destination</div>
                     <a
                       href="#contact"
-                      className="inline-block px-6 py-2.5 rounded-sm text-[11px] tracking-[2px] uppercase font-medium text-white transition-all hover:opacity-80"
-                      style={{ background: color }}
+                      className="inline-block px-6 py-3 rounded-lg text-[11px] tracking-wider uppercase font-semibold text-white transition-all hover:opacity-80"
+                      style={{ background: trip.color }}
                     >
                       Book This Journey
                     </a>
@@ -1945,11 +1986,18 @@ function TripJourneyView({ tripKey, onBack, color }: { tripKey: string; onBack: 
               </div>
             </div>
           )}
+
+          {/* Moving indicator */}
           {isMoving && (
-            <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px]" style={{ background: 'rgba(0,0,0,0.8)', border: `1px solid ${color}44`, color }}>
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: color }} />
-                Travelling to next stop…
+            <div className="flex items-center justify-center h-full">
+              <div 
+                className="flex items-center gap-3 px-6 py-3 rounded-full"
+                style={{ background: 'rgba(0,0,0,0.6)', border: `1px solid ${trip.color}44` }}
+              >
+                <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: trip.color }} />
+                <span className="text-[13px]" style={{ color: trip.color }}>
+                  Travelling to {stops[currentStop + 1]?.name}...
+                </span>
               </div>
             </div>
           )}
@@ -1959,6 +2007,7 @@ function TripJourneyView({ tripKey, onBack, color }: { tripKey: string; onBack: 
   );
 }
 
+/* ===== AI TRIP PLANNER MAIN ===== */
 function AiTripPlanner() {
   const [open, setOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
@@ -1968,19 +2017,19 @@ function AiTripPlanner() {
 
   const openPlanner = () => {
     setOpen(true);
-    setTimeout(() => setPanelVisible(true), 20);
+    setTimeout(() => setPanelVisible(true), 30);
   };
   const closePlanner = () => {
     setPanelVisible(false);
+    setTripVisible(false);
     setTimeout(() => {
       setOpen(false);
       setSelectedTrip(null);
-      setTripVisible(false);
     }, 400);
   };
   const selectTrip = (key: string) => {
     setSelectedTrip(key);
-    setTimeout(() => setTripVisible(true), 20);
+    setTimeout(() => setTripVisible(true), 30);
   };
   const goBack = () => {
     setTripVisible(false);
@@ -1988,38 +2037,34 @@ function AiTripPlanner() {
   };
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = open ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
   return (
     <>
       <style>{`
-        @keyframes tripPing {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(2.2); opacity: 0; }
+        @keyframes stopPulse {
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(1.6); opacity: 0; }
         }
         @keyframes carDust {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(0.5); opacity: 0.2; }
+          0%, 100% { transform: scale(1) translateX(0); opacity: 0.5; }
+          50% { transform: scale(0.4) translateX(-8px); opacity: 0.15; }
+        }
+        @keyframes carGlow {
+          0% { opacity: 0.3; transform: scale(0.9); }
+          100% { opacity: 0.6; transform: scale(1.1); }
         }
         @keyframes aiPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(220,50,50,0.5), 0 8px 32px rgba(220,50,50,0.35); }
-          50% { box-shadow: 0 0 0 12px rgba(220,50,50,0), 0 8px 32px rgba(220,50,50,0.5); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(220,50,50,0.5), 0 8px 32px rgba(220,50,50,0.3); }
+          50% { box-shadow: 0 0 0 14px rgba(220,50,50,0), 0 8px 40px rgba(220,50,50,0.5); }
         }
         @keyframes tripCardIn {
-          from { opacity: 0; transform: translateY(24px) scale(0.96); }
+          from { opacity: 0; transform: translateY(28px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .trip-card-anim { animation: tripCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .trip-card-anim { animation: tripCardIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
       `}</style>
 
       {/* Floating AI Bubble */}
@@ -2031,12 +2076,12 @@ function AiTripPlanner() {
         style={{
           bottom: '5.5rem',
           right: '1rem',
-          width: hovered ? 'auto' : 56,
-          height: 56,
-          borderRadius: hovered ? 28 : '50%',
+          width: hovered ? 'auto' : 58,
+          height: 58,
+          borderRadius: hovered ? 29 : '50%',
           background: 'linear-gradient(135deg, #dc3232 0%, #ff5e5e 100%)',
           animation: 'aiPulse 2.5s ease-in-out infinite',
-          padding: hovered ? '0 20px' : 0,
+          padding: hovered ? '0 22px' : 0,
           gap: 10,
           border: 'none',
           cursor: 'pointer',
@@ -2045,14 +2090,13 @@ function AiTripPlanner() {
         }}
         aria-label="Open AI Trip Planner"
       >
-        {/* AI Sparkle Icon */}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
           <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="white" />
           <path d="M19 16L19.8 18.2L22 19L19.8 19.8L19 22L18.2 19.8L16 19L18.2 18.2L19 16Z" fill="white" opacity="0.7" />
           <path d="M5 2L5.5 3.5L7 4L5.5 4.5L5 6L4.5 4.5L3 4L4.5 3.5L5 2Z" fill="white" opacity="0.6" />
         </svg>
         {hovered && (
-          <span className="text-white text-[12px] font-semibold tracking-wide" style={{ animation: 'fadeInUp 0.2s ease' }}>
+          <span className="text-white text-[13px] font-semibold tracking-wide">
             AI Trip Planner
           </span>
         )}
@@ -2064,96 +2108,96 @@ function AiTripPlanner() {
           className="fixed inset-0 z-[9998] flex flex-col"
           style={{
             opacity: panelVisible ? 1 : 0,
-            transform: panelVisible ? 'scale(1)' : 'scale(0.96)',
-            transition: 'opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1)',
-            background: 'rgba(0,0,0,0.98)',
-            backdropFilter: 'blur(20px)',
+            transform: panelVisible ? 'scale(1)' : 'scale(0.95)',
+            transition: 'opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1)',
+            background: 'rgba(5,5,8,0.98)',
+            backdropFilter: 'blur(30px)',
           }}
         >
           {/* Modal header */}
-          <div
-            className="flex items-center justify-between px-5 md:px-8 py-4 md:py-5 flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.6)' }}
-          >
+          <div className="flex items-center justify-between px-6 md:px-10 py-4 md:py-5 flex-shrink-0 border-b border-white/[0.06]">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #dc3232, #ff5e5e)' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #dc3232, #ff5e5e)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="white" />
                 </svg>
               </div>
               <div>
-                <div className="font-playfair text-white text-lg md:text-xl">AI Trip Planner</div>
-                <div className="text-[10px] tracking-[2px] uppercase text-red/70">by Maa Travels</div>
+                <div className="font-playfair text-white text-xl md:text-2xl">AI Trip Planner</div>
+                <div className="text-[10px] tracking-[2.5px] uppercase text-red/60">by Maa Travels</div>
               </div>
             </div>
             <button
               onClick={closePlanner}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all"
-              style={{ border: '1px solid rgba(255,255,255,0.12)' }}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/[0.1]"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
           </div>
 
           {/* Content area */}
           <div className="flex-1 overflow-hidden relative">
-
             {/* Trip List View */}
             <div
-              className="absolute inset-0 overflow-y-auto p-5 md:p-8"
+              className="absolute inset-0 overflow-y-auto p-6 md:p-10"
               style={{
                 opacity: !selectedTrip ? 1 : 0,
                 pointerEvents: !selectedTrip ? 'all' : 'none',
-                transition: 'opacity 0.35s ease',
+                transition: 'opacity 0.4s ease',
               }}
             >
               <div className="max-w-5xl mx-auto">
-                <div className="mb-8 text-center">
-                  <h2 className="font-playfair text-2xl md:text-3xl text-white mb-2">Choose Your Journey</h2>
-                  <p className="text-white/40 text-[13px]">Pick a destination and explore the route with live stops, photos and details</p>
+                <div className="mb-10 text-center">
+                  <h2 className="font-playfair text-3xl md:text-4xl text-white mb-3">Choose Your Journey</h2>
+                  <p className="text-white/40 text-[14px]">Select a route and watch your car travel through every stop with live details</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {ALL_TRIPS.map((trip, i) => (
                     <button
                       key={trip.key}
                       onClick={() => selectTrip(trip.key)}
-                      className="trip-card-anim relative overflow-hidden rounded-xl text-left group cursor-pointer"
+                      className="trip-card-anim relative overflow-hidden rounded-2xl text-left group cursor-pointer"
                       style={{
-                        animationDelay: `${i * 0.08}s`,
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        background: 'rgba(255,255,255,0.03)',
-                        transition: 'transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+                        animationDelay: `${i * 0.07}s`,
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        background: 'rgba(255,255,255,0.02)',
+                        transition: 'transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease',
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
-                        (e.currentTarget as HTMLElement).style.borderColor = `${trip.color}88`;
-                        (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px ${trip.color}30`;
+                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)';
+                        (e.currentTarget as HTMLElement).style.borderColor = `${trip.color}66`;
+                        (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 50px ${trip.color}20`;
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.transform = '';
-                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)';
+                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)';
                         (e.currentTarget as HTMLElement).style.boxShadow = '';
                       }}
                     >
-                      <div className="relative h-44 overflow-hidden">
-                        <img src={trip.img} alt={trip.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ filter: 'brightness(0.65)' }} />
-                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85) 100%)' }} />
-                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm text-[9px] tracking-[2px] uppercase font-medium" style={{ background: trip.color, color: 'white' }}>
+                      <div className="relative h-48 overflow-hidden">
+                        <img src={trip.img} alt={trip.name} className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-110" style={{ filter: 'brightness(0.6)' }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                        <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg text-[10px] tracking-[2px] uppercase font-bold" style={{ background: trip.color, color: 'white' }}>
                           {trip.tag}
                         </div>
-                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-sm text-[9px] tracking-[2px] uppercase" style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                        <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg text-[10px] tracking-[2px] uppercase" style={{ background: 'rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
                           {trip.duration}
                         </div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <h3 className="font-playfair text-white text-xl mb-1">{trip.name}</h3>
+                          <p className="text-white/40 text-[12px] line-clamp-2">{TRIP_DATA[trip.key].desc}</p>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-playfair text-white text-lg mb-1">{trip.name}</h3>
-                        <p className="text-white/40 text-[12px] leading-relaxed">{TRIP_DATA[trip.key].desc}</p>
-                        <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium" style={{ color: trip.color }}>
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-[11px] font-medium" style={{ color: trip.color }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="currentColor" /></svg>
                           Explore Route
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M7 4l2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                        <div className="flex items-center gap-1 text-white/30 text-[11px]">
+                          <span>{TRIP_DATA[trip.key].stops.length} stops</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
                       </div>
                     </button>
@@ -2167,17 +2211,13 @@ function AiTripPlanner() {
               className="absolute inset-0"
               style={{
                 opacity: selectedTrip && tripVisible ? 1 : 0,
-                transform: selectedTrip && tripVisible ? 'translateX(0)' : 'translateX(30px)',
+                transform: selectedTrip && tripVisible ? 'translateX(0)' : 'translateX(40px)',
                 pointerEvents: selectedTrip ? 'all' : 'none',
-                transition: 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.4,0,0.2,1)',
+                transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.4,0,0.2,1)',
               }}
             >
               {selectedTrip && (
-                <TripJourneyView
-                  tripKey={selectedTrip}
-                  onBack={goBack}
-                  color={TRIP_DATA[selectedTrip].color}
-                />
+                <TripJourneyView tripKey={selectedTrip} onBack={goBack} />
               )}
             </div>
           </div>
@@ -2186,6 +2226,7 @@ function AiTripPlanner() {
     </>
   );
 }
+
 
 /* ─── WhatsApp Button ─── */
 function WhatsAppButton() {
