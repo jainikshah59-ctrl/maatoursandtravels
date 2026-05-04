@@ -1,1345 +1,1571 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  MapPin, Car, Plane, Church, Building2,
+  Phone, MessageCircle, Mail, MapPinned, Check,
+  ArrowRight, Star, Menu, X, ChevronRight, Users
+} from 'lucide-react';
 
-const STORAGE_KEY = "maa_travels_data_v1";
+/* ─── Performance Boost ─── */
+function usePerformanceBoost() {
+  useEffect(() => {
+    // ── 1. Preload ONLY the splash video + logo immediately ──
+    // Hero video is intentionally excluded here — loading both at once
+    // splits bandwidth and makes the splash take longer to start.
+    // Hero video gets its own <link preload> injected once splash ends.
+    // Detect WebM support once
+    const supportsWebM = (() => {
+      const v = document.createElement('video');
+      return v.canPlayType('video/webm; codecs="vp9"') !== '';
+    })();
 
-const initialData = {
-  bookings: [],
-  expenses: [],
-  drivers: [],
-  maintenance: [],
-  commissions: [],
-};
+    const splashAssets = [
+      { href: supportsWebM ? '/videos/splash.webm' : '/videos/splash.mp4', as: 'video', type: supportsWebM ? 'video/webm' : 'video/mp4' },
+      { href: '/images/logo.webp', as: 'image' },
+    ];
+    splashAssets.forEach(({ href, as, type }: { href: string; as: string; type?: string }) => {
+      if (document.querySelector(`link[href="${href}"]`)) return;
+      const link = document.createElement('link');
+      link.rel  = 'preload';
+      link.href = href;
+      link.as   = as;
+      if (type) link.setAttribute('type', type);
+      document.head.appendChild(link);
+    });
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : initialData;
-  } catch { return initialData; }
+    // Preload hero video only after splash — injected when splashDone becomes true
+    // (handled separately in Hero component via useEffect on splashDone)
+
+    // ── 2. Prefetch below-the-fold images after a short idle delay ──
+    const belowFoldImages = [
+      '/images/saurashtra.webp', '/images/kutch.webp', '/images/goa.webp',
+      '/images/himachal.webp',   '/images/rajasthan.webp', '/images/gujarat.webp',
+    ];
+    const prefetchImages = () => {
+      belowFoldImages.forEach((href) => {
+        if (document.querySelector(`link[href="${href}"]`)) return;
+        const link = document.createElement('link');
+        link.rel  = 'prefetch';
+        link.href = href;
+        link.as   = 'image';
+        document.head.appendChild(link);
+      });
+    };
+    // Use requestIdleCallback when available, fallback to setTimeout
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(prefetchImages, { timeout: 2000 });
+    } else {
+      setTimeout(prefetchImages, 1500);
+    }
+
+    // ── 3. Lazy-load all non-critical images with IntersectionObserver ──
+    const lazyObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target as HTMLImageElement;
+          const dataSrc = img.getAttribute('data-src');
+          if (dataSrc) {
+            img.src = dataSrc;
+            img.removeAttribute('data-src');
+          }
+          lazyObserver.unobserve(img);
+        });
+      },
+      { rootMargin: '200px 0px' } // start loading 200px before entering viewport
+    );
+    // Observe any image that has a data-src attribute
+    document.querySelectorAll('img[data-src]').forEach((img) => lazyObserver.observe(img));
+
+    // ── 4. DNS-prefetch & preconnect for any external origins ──
+    const externalOrigins = [
+      { href: 'https://fonts.googleapis.com',  rel: 'preconnect' },
+      { href: 'https://fonts.gstatic.com',     rel: 'preconnect', crossOrigin: true },
+      { href: 'https://wa.me',                 rel: 'dns-prefetch' },
+    ];
+    externalOrigins.forEach(({ href, rel, crossOrigin }) => {
+      if (document.querySelector(`link[href="${href}"]`)) return;
+      const link = document.createElement('link');
+      link.rel  = rel;
+      link.href = href;
+      if (crossOrigin) link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    });
+
+    // ── 5. Cache static assets in a Service Worker (if supported) ──
+    if ('serviceWorker' in navigator) {
+      // Inline SW as a Blob so no separate sw.js file is needed
+      const swCode = `
+        const CACHE = 'maa-travels-v2';
+        const PRECACHE = [
+          '/images/logo.webp',
+          '/images/saurashtra.webp',
+          '/images/kutch.webp',
+          '/images/goa.webp',
+          '/images/himachal.webp',
+          '/images/rajasthan.webp',
+          '/images/gujarat.webp',
+          '/images/kerala.webp',
+          '/images/about_journey.webp',
+        ];
+
+        self.addEventListener('install', (e) => {
+          e.waitUntil(
+            caches.open(CACHE).then((cache) => cache.addAll(PRECACHE))
+          );
+          self.skipWaiting();
+        });
+
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then((keys) =>
+              Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+            )
+          );
+          self.clients.claim();
+        });
+
+        self.addEventListener('fetch', (e) => {
+          // Only cache GET requests for same-origin assets
+          if (e.request.method !== 'GET') return;
+          const url = new URL(e.request.url);
+          if (url.origin !== location.origin) return;
+
+          e.respondWith(
+            caches.match(e.request).then((cached) => {
+              if (cached) return cached;
+              return fetch(e.request).then((response) => {
+                // Cache images and videos on first fetch
+                if (
+                  response.ok &&
+                  (e.request.url.match(/\\.(png|jpg|jpeg|webp|webm|mp4|svg)$/))
+                ) {
+                  const clone = response.clone();
+                  caches.open(CACHE).then((cache) => cache.put(e.request, clone));
+                }
+                return response;
+              });
+            })
+          );
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(() => {
+        // SW registration failed silently — site still works fine
+      });
+    }
+
+    return () => lazyObserver.disconnect();
+  }, []);
 }
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+/* ─── Scroll Progress Hook ─── */
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      setProgress(Math.min(100, Math.max(0, pct)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return progress;
 }
 
-// Skeuomorphic icon components
-const Icons = {
-  Dashboard: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.9"/>
-      <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
-      <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
-      <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.9"/>
-    </svg>
-  ),
-  Booking: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="4" width="18" height="17" rx="3" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
-      <rect x="8" y="2" width="3" height="4" rx="1" fill="currentColor"/>
-      <rect x="13" y="2" width="3" height="4" rx="1" fill="currentColor"/>
-      <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" strokeWidth="1.5"/>
-      <circle cx="8" cy="14" r="1.5" fill="currentColor"/>
-      <circle cx="12" cy="14" r="1.5" fill="currentColor"/>
-      <circle cx="16" cy="14" r="1.5" fill="currentColor"/>
-    </svg>
-  ),
-  Fuel: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="6" width="12" height="16" rx="2" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
-      <rect x="7" y="2" width="4" height="5" rx="1" fill="currentColor" opacity="0.5"/>
-      <path d="M15 8h3a2 2 0 012 2v2a2 2 0 01-2 2h-3" stroke="currentColor" strokeWidth="1.5"/>
-      <line x1="6" y1="13" x2="12" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="6" y1="16" x2="10" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  Wrench: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l2.5-2.5a5.5 5.5 0 01-7.07 7.07l-4.3 4.3a2.12 2.12 0 01-3-3l4.3-4.3A5.5 5.5 0 0114.7 6.3z" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Driver: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="17" cy="7" r="3" fill="currentColor" opacity="0.8"/>
-      <text x="17" y="10" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold">₹</text>
-    </svg>
-  ),
-  Profit: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <polyline points="16 7 22 7 22 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Bill: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="2" width="14" height="20" rx="2" fill="currentColor" opacity="0.1" stroke="currentColor" strokeWidth="1.5"/>
-      <line x1="8" y1="7" x2="16" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="8" y1="13" x2="13" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M4 19l2-1 2 1 2-1 2 1 2-1 2 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  AI: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="7" width="20" height="14" rx="3" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
-      <circle cx="8" cy="14" r="2" fill="currentColor"/>
-      <circle cx="16" cy="14" r="2" fill="currentColor"/>
-      <path d="M12 3v4M9 3l1.5 4M15 3l-1.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="12" cy="3" r="1" fill="currentColor"/>
-    </svg>
-  ),
-  Commission: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.1" stroke="currentColor" strokeWidth="1.5"/>
-      <text x="12" y="16" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">%</text>
-    </svg>
-  ),
-  Plus: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  Trash: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M9 6V4h6v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Bus: () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="5" width="20" height="13" rx="3" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
-      <circle cx="7" cy="18" r="2.5" fill="currentColor"/>
-      <circle cx="17" cy="18" r="2.5" fill="currentColor"/>
-      <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="1.2"/>
-      <rect x="5" y="6" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.4"/>
-      <rect x="10" y="6" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.4"/>
-      <rect x="15" y="6" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.4"/>
-    </svg>
-  ),
-  Search: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-      <circle cx="11" cy="11" r="8"/>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-  ),
-  ArrowLeft: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"/>
-      <polyline points="12 19 5 12 12 5"/>
-    </svg>
-  ),
-  Filter: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-    </svg>
-  ),
-  ChevronRight: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 18 15 12 9 6"/>
-    </svg>
-  ),
-  Calendar: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8" y1="2" x2="8" y2="6"/>
-      <line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>
-  ),
-  Phone: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-    </svg>
-  ),
-  Rupee: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M6 3h12M6 8h12M6 13l6 6M6 13h6a3 3 0 003-3v0a3 3 0 00-3-3"/>
-    </svg>
-  ),
-  MapPin: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-      <circle cx="12" cy="10" r="3"/>
-    </svg>
-  ),
-  Users: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-      <path d="M16 3.13a4 4 0 010 7.75"/>
-    </svg>
-  ),
-  Car: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2"/>
-      <circle cx="6.5" cy="16.5" r="2.5"/>
-      <circle cx="16.5" cy="16.5" r="2.5"/>
-    </svg>
-  ),
-  Printer: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <polyline points="6 9 6 2 18 2 18 9"/>
-      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8" rx="1"/>
-    </svg>
-  ),
-  Check: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  ),
-  X: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  ),
-};
+/* ─── Scroll Reveal Hook ─── */
+function useReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            // Re-observe for scroll up/down animations
+            // Don't unobserve so it can animate again when scrolling back
+          } else {
+            e.target.classList.remove('visible');
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
 
-const NAV = [
-  { key: "dashboard", label: "Home", icon: Icons.Dashboard },
-  { key: "bookings", label: "Bookings", icon: Icons.Booking },
-  { key: "expenses", label: "Fuel", icon: Icons.Fuel },
-  { key: "maintenance", label: "Service", icon: Icons.Wrench },
-  { key: "drivers", label: "Drivers", icon: Icons.Driver },
-  { key: "commissions", label: "Comm.", icon: Icons.Commission },
-  { key: "bills", label: "Bills", icon: Icons.Bill },
-  { key: "profit", label: "P&L", icon: Icons.Profit },
-  { key: "ai", label: "AI", icon: Icons.AI },
-];
+/* ─── Custom Cursor ─── */
+function CustomCursor() {
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const pos = useRef({ x: 0, y: 0, rx: 0, ry: 0 });
 
-const VEHICLE_TYPES = ["Bus (AC)", "Bus (Non-AC)", "Mini Bus", "Tempo Traveller", "SUV", "Sedan"];
-const EXPENSE_TYPES = ["Petrol", "Diesel", "CNG", "Toll", "Parking", "Driver Expense", "Food", "Other"];
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      pos.current.x = e.clientX;
+      pos.current.y = e.clientY;
+      if (cursorRef.current) {
+        cursorRef.current.style.left = (e.clientX - 6) + 'px';
+        cursorRef.current.style.top = (e.clientY - 6) + 'px';
+      }
+    };
+    const animate = () => {
+      pos.current.rx += (pos.current.x - pos.current.rx) * 0.12;
+      pos.current.ry += (pos.current.y - pos.current.ry) * 0.12;
+      if (ringRef.current) {
+        ringRef.current.style.left = (pos.current.rx - 20) + 'px';
+        ringRef.current.style.top = (pos.current.ry - 20) + 'px';
+      }
+      requestAnimationFrame(animate);
+    };
+    window.addEventListener('mousemove', onMove);
+    const raf = requestAnimationFrame(animate);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
-function fmt(n) { return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-
-// ─── Mobile Styles ───────────────────────────────────────────────────────────
-const colors = {
-  primary: "#1a6b3a",
-  primaryLight: "#22873e",
-  primaryLighter: "#f0fdf4",
-  danger: "#dc2626",
-  warning: "#d97706",
-  info: "#0369a1",
-  purple: "#7c3aed",
-  dark: "#1e293b",
-  gray: "#64748b",
-  grayLight: "#94a3b8",
-  grayBg: "#f1f5f9",
-  white: "#ffffff",
-};
-
-// ─── Mobile Stat Card ────────────────────────────────────────────────────────
-function StatCard({ label, value, color = colors.primary, sub, compact }) {
   return (
-    <div style={{
-      background: colors.white,
-      border: "1px solid #e2e8f0",
-      borderRadius: 14,
-      padding: compact ? "12px 14px" : "16px 14px",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-      minWidth: 0,
-    }}>
-      <div style={{ fontSize: 10, color: colors.grayLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: compact ? 20 : 22, fontWeight: 800, color, lineHeight: 1.2 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 3 }}>{sub}</div>}
-    </div>
+    <>
+      <div ref={cursorRef} className="fixed w-3 h-3 bg-red rounded-full pointer-events-none z-[9999] transition-transform duration-150 mix-blend-difference hidden md:block" />
+      <div ref={ringRef} className="fixed w-10 h-10 border border-red-light rounded-full pointer-events-none z-[9998] transition-all duration-100 opacity-50 hidden md:block" />
+    </>
   );
 }
 
-// ─── Mobile Modal (Full Screen Bottom Sheet Style) ───────────────────────────
-function Modal({ title, onClose, children }) {
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{
-        background: "#fff",
-        borderRadius: "20px 20px 0 0",
-        padding: "20px 16px 32px",
-        width: "100%",
-        maxHeight: "90vh",
-        overflowY: "auto",
-        boxShadow: "0 -8px 32px rgba(0,0,0,0.2)",
-        animation: "slideUp 0.25s ease-out",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid #f1f5f9" }}>
-          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: colors.dark }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "#f1f5f9", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: colors.gray }}>
-            <Icons.X />
-          </button>
-        </div>
-        {children}
-      </div>
-      <style>{`@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
-    </div>
-  );
-}
+/* ─── Navigation ─── */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-// ─── Mobile Field ────────────────────────────────────────────────────────────
-function Field({ label, children, half }) {
-  return (
-    <div style={{ marginBottom: 12, flex: half ? "0 0 calc(50% - 6px)" : "1 1 100%" }}>
-      <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.gray, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</label>
-      {children}
-    </div>
-  );
-}
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  border: "1.5px solid #e2e8f0",
-  borderRadius: 12,
-  fontSize: 15,
-  color: colors.dark,
-  background: "#fff",
-  boxSizing: "border-box",
-  outline: "none",
-  transition: "border-color 0.2s",
-  fontFamily: "inherit",
-};
-
-const btnPrimary = {
-  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
-  color: "#fff",
-  border: "none",
-  borderRadius: 14,
-  padding: "14px 24px",
-  fontWeight: 700,
-  fontSize: 15,
-  cursor: "pointer",
-  boxShadow: `0 4px 14px rgba(26,107,58,0.3)`,
-  transition: "transform 0.1s",
-  fontFamily: "inherit",
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-};
-
-const btnGhost = {
-  background: "#f1f5f9",
-  color: colors.dark,
-  border: "none",
-  borderRadius: 14,
-  padding: "14px 24px",
-  fontWeight: 600,
-  fontSize: 15,
-  cursor: "pointer",
-  fontFamily: "inherit",
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-};
-
-const cardStyle = {
-  background: colors.white,
-  border: "1px solid #e2e8f0",
-  borderRadius: 14,
-  padding: "14px 16px",
-  marginBottom: 10,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-};
-
-
-// ─── Pages ───────────────────────────────────────────────────────────────────
-
-function Dashboard({ data }) {
-  const totalIncome = data.bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
-  const totalExpenses = data.expenses.reduce((s, e) => s + Number(e.amount || 0), 0)
-    + data.maintenance.reduce((s, m) => s + Number(m.cost || 0), 0)
-    + data.commissions.reduce((s, c) => s + Number(c.amount || 0), 0)
-    + data.drivers.reduce((s, d) => s + Number(d.salary || 0), 0);
-  const profit = totalIncome - totalExpenses;
-
-  const fuelExp = data.expenses.filter(e => ["Petrol","Diesel","CNG"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-  const tollPark = data.expenses.filter(e => ["Toll","Parking"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-
-  const recentBookings = [...data.bookings].sort((a, b) => b.date > a.date ? 1 : -1).slice(0, 3);
-
-  // Monthly chart data
-  const months = {};
-  data.bookings.forEach(b => {
-    const m = (b.date || "").slice(0, 7);
-    if (m) months[m] = (months[m] || 0) + Number(b.amount || 0);
-  });
-  const monthKeys = Object.keys(months).sort().slice(-4);
-  const maxM = Math.max(...monthKeys.map(k => months[k]), 1);
-
-  return (
-    <div>
-      {/* Quick Stats Row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
-        <StatCard label="Income" value={fmt(totalIncome)} color={colors.primary} compact sub={`${data.bookings.length} bkgs`} />
-        <StatCard label="Expense" value={fmt(totalExpenses)} color={colors.danger} compact />
-        <StatCard label={profit >= 0 ? "Profit" : "Loss"} value={fmt(Math.abs(profit))} color={profit >= 0 ? colors.primary : colors.danger} compact />
-      </div>
-
-      {/* Secondary Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 20 }}>
-        <StatCard label="Fuel" value={fmt(fuelExp)} color={colors.purple} compact />
-        <StatCard label="Toll" value={fmt(tollPark)} color={colors.info} compact />
-        <StatCard label="Drivers" value={data.drivers.length} color={colors.dark} compact />
-      </div>
-
-      {/* Monthly Chart */}
-      {monthKeys.length > 0 && (
-        <div style={{ ...cardStyle, marginBottom: 20, padding: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: colors.dark, marginBottom: 14, textTransform: "uppercase", letterSpacing: 0.6 }}>Monthly Income</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 90 }}>
-            {monthKeys.map(k => (
-              <div key={k} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                <div style={{ fontSize: 9, color: colors.grayLight, fontWeight: 600 }}>{fmt(months[k]).replace("₹","")}</div>
-                <div style={{
-                  width: "100%",
-                  height: Math.max(6, (months[k] / maxM) * 55),
-                  background: `linear-gradient(180deg, ${colors.primaryLight} 0%, ${colors.primary} 100%)`,
-                  borderRadius: "4px 4px 0 0",
-                  minHeight: 6,
-                }} />
-                <div style={{ fontSize: 9, color: colors.gray, fontWeight: 600 }}>{k.slice(5)}/{k.slice(2, 4)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recent Bookings */}
-      <div style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: colors.dark, padding: "14px 16px", textTransform: "uppercase", letterSpacing: 0.6, borderBottom: "1px solid #f1f5f9" }}>Recent Bookings</div>
-        {recentBookings.length === 0 ? (
-          <div style={{ color: colors.grayLight, fontSize: 14, textAlign: "center", padding: 30 }}>No bookings yet</div>
-        ) : recentBookings.map(b => (
-          <div key={b.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #f1f5f9" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: colors.dark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{b.clientName}</div>
-              <div style={{ fontSize: 12, color: colors.gray, marginTop: 2 }}>{b.from} → {b.to} · {b.date}</div>
-            </div>
-            <div style={{ fontWeight: 800, color: colors.primary, fontSize: 14, marginLeft: 8, whiteSpace: "nowrap" }}>{fmt(b.amount)}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BookingsPage({ data, setData }) {
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ clientName: "", phone: "", from: "", to: "", date: "", returnDate: "", vehicle: "", vehicleNo: "", driver: "", amount: "", advance: "", remark: "", passengers: "" });
-  const [search, setSearch] = useState("");
-
-  const save = () => {
-    if (!form.clientName || !form.from || !form.to || !form.amount) return alert("Fill required fields");
-    const nd = { ...data, bookings: [...data.bookings, { ...form, id: uid(), createdAt: new Date().toISOString() }] };
-    setData(nd); saveData(nd); setShow(false);
-    setForm({ clientName: "", phone: "", from: "", to: "", date: "", returnDate: "", vehicle: "", vehicleNo: "", driver: "", amount: "", advance: "", remark: "", passengers: "" });
-  };
-
-  const del = (id) => { if (!confirm("Delete this booking?")) return; const nd = { ...data, bookings: data.bookings.filter(b => b.id !== id) }; setData(nd); saveData(nd); };
-
-  const filtered = data.bookings.filter(b =>
-    b.clientName?.toLowerCase().includes(search.toLowerCase()) ||
-    b.from?.toLowerCase().includes(search.toLowerCase()) ||
-    b.to?.toLowerCase().includes(search.toLowerCase())
-  ).sort((a, b) => b.createdAt > a.createdAt ? 1 : -1);
-
-  const balance = (b) => Number(b.amount || 0) - Number(b.advance || 0);
-
-  return (
-    <div>
-      {/* Search + Add */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-        <div style={{ flex: 1, position: "relative" }}>
-          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: colors.grayLight }}><Icons.Search /></div>
-          <input placeholder="Search bookings..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: 38 }} />
-        </div>
-        <button onClick={() => setShow(true)} style={{ ...btnPrimary, width: "auto", padding: "12px 16px", borderRadius: 12 }}>
-          <Icons.Plus />
-        </button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>📋</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No bookings found</div>
-        </div>
-      ) : filtered.map(b => (
-        <div key={b.id} style={{ ...cardStyle, padding: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: colors.dark }}>{b.clientName}</div>
-              <div style={{ fontSize: 12, color: colors.gray, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
-                <Icons.Phone /> {b.phone || "—"}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <div style={{ fontWeight: 800, fontSize: 16, color: colors.primary }}>{fmt(b.amount)}</div>
-              <button onClick={() => del(b.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: colors.danger, display: "flex", alignItems: "center" }}>
-                <Icons.Trash />
-              </button>
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {[
-              ["Route", `${b.from} → ${b.to}`],
-              ["Date", b.date || "—"],
-              ["Return", b.returnDate || "—"],
-              ["Vehicle", `${b.vehicle || "—"} (${b.vehicleNo || "—"})`],
-              ["Driver", b.driver || "—"],
-              ["Passengers", b.passengers || "—"],
-              ["Advance", fmt(b.advance)],
-              ["Balance", fmt(balance(b))],
-            ].map(([k, v]) => (
-              <div key={k} style={{ background: "#f8fafc", borderRadius: 8, padding: "6px 8px" }}>
-                <div style={{ fontSize: 9, color: colors.grayLight, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4 }}>{k}</div>
-                <div style={{ fontSize: 12, color: colors.dark, fontWeight: 600, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v}</div>
-              </div>
-            ))}
-          </div>
-          {b.remark && <div style={{ marginTop: 8, fontSize: 12, color: colors.warning, background: "#fefce8", borderRadius: 8, padding: "8px 10px", borderLeft: "3px solid #eab308" }}>📝 {b.remark}</div>}
-        </div>
-      ))}
-
-      {show && (
-        <Modal title="New Booking" onClose={() => setShow(false)}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <Field label="Client Name *"><input value={form.clientName} onChange={e => setForm(p => ({ ...p, clientName: e.target.value }))} style={inputStyle} placeholder="Enter name" /></Field>
-            <Field label="Phone" half><input type="tel" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={inputStyle} placeholder="Mobile number" /></Field>
-            <Field label="Passengers" half><input type="number" value={form.passengers} onChange={e => setForm(p => ({ ...p, passengers: e.target.value }))} style={inputStyle} placeholder="Count" /></Field>
-            <Field label="From *" half><input value={form.from} onChange={e => setForm(p => ({ ...p, from: e.target.value }))} style={inputStyle} placeholder="Source" /></Field>
-            <Field label="To *" half><input value={form.to} onChange={e => setForm(p => ({ ...p, to: e.target.value }))} style={inputStyle} placeholder="Destination" /></Field>
-            <Field label="Journey Date" half><input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Return Date" half><input type="date" value={form.returnDate} onChange={e => setForm(p => ({ ...p, returnDate: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Vehicle Type" half>
-              <select value={form.vehicle} onChange={e => setForm(p => ({ ...p, vehicle: e.target.value }))} style={inputStyle}>
-                <option value="">Select</option>
-                {VEHICLE_TYPES.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
-            </Field>
-            <Field label="Vehicle Number" half><input value={form.vehicleNo} onChange={e => setForm(p => ({ ...p, vehicleNo: e.target.value }))} style={inputStyle} placeholder="GJ-XX-XXXX" /></Field>
-            <Field label="Driver" half>
-              <select value={form.driver} onChange={e => setForm(p => ({ ...p, driver: e.target.value }))} style={inputStyle}>
-                <option value="">Select Driver</option>
-                {data.drivers.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-              </select>
-            </Field>
-            <Field label="Total Amount ₹ *" half><input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Advance Paid ₹" half><input type="number" value={form.advance} onChange={e => setForm(p => ({ ...p, advance: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Remark"><input value={form.remark} onChange={e => setForm(p => ({ ...p, remark: e.target.value }))} style={inputStyle} placeholder="Any notes..." /></Field>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button onClick={save} style={btnPrimary}>Save Booking</button>
-            <button onClick={() => setShow(false)} style={btnGhost}>Cancel</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-function ExpensesPage({ data, setData }) {
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ date: "", type: "Petrol", litres: "", rate: "", amount: "", vehicleNo: "", driver: "", remark: "" });
-
-  const save = () => {
-    if (!form.type || !form.amount) return alert("Fill required fields");
-    const nd = { ...data, expenses: [...data.expenses, { ...form, id: uid() }] };
-    setData(nd); saveData(nd); setShow(false);
-    setForm({ date: "", type: "Petrol", litres: "", rate: "", amount: "", vehicleNo: "", driver: "", remark: "" });
-  };
-
-  const del = (id) => { if (!confirm("Delete this expense?")) return; const nd = { ...data, expenses: data.expenses.filter(e => e.id !== id) }; setData(nd); saveData(nd); };
-
-  const byType = EXPENSE_TYPES.reduce((acc, t) => {
-    acc[t] = data.expenses.filter(e => e.type === t).reduce((s, e) => s + Number(e.amount || 0), 0);
-    return acc;
-  }, {});
-
-  const typeColors = { Petrol: "#dc2626", Diesel: "#7c3aed", CNG: "#0369a1", Toll: "#b45309", Parking: "#6b7280", "Driver Expense": "#1a6b3a", Food: "#d97706", Other: "#374151" };
-
-  const activeTypes = EXPENSE_TYPES.filter(t => byType[t] > 0);
-
-  return (
-    <div>
-      {/* Type Summary */}
-      {activeTypes.length > 0 && (
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
-          {activeTypes.map(t => (
-            <div key={t} style={{ background: colors.white, border: `2px solid ${typeColors[t]}22`, borderRadius: 12, padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", minWidth: 110, flexShrink: 0 }}>
-              <div style={{ fontSize: 10, color: colors.gray, fontWeight: 700, textTransform: "uppercase" }}>{t}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: typeColors[t], marginTop: 2 }}>{fmt(byType[t])}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
-        <button onClick={() => setShow(true)} style={{ ...btnPrimary, width: "auto", padding: "12px 18px" }}>
-          <Icons.Plus /> Add Expense
-        </button>
-      </div>
-
-      {data.expenses.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>⛽</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No expenses recorded</div>
-        </div>
-      ) : [...data.expenses].reverse().map(e => (
-        <div key={e.id} style={{ ...cardStyle, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flex: 1, minWidth: 0 }}>
-            <div style={{ width: 12, height: 12, borderRadius: "50%", background: typeColors[e.type] || colors.gray, flexShrink: 0 }} />
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: colors.dark }}>{e.type} {e.litres ? `· ${e.litres}L @ ₹${e.rate}` : ""}</div>
-              <div style={{ fontSize: 12, color: colors.gray, marginTop: 1 }}>{e.date} {e.vehicleNo && `· ${e.vehicleNo}`} {e.driver && `· ${e.driver}`}</div>
-              {e.remark && <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 2 }}>{e.remark}</div>}
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
-            <div style={{ fontWeight: 800, color: typeColors[e.type] || colors.dark, fontSize: 15 }}>{fmt(e.amount)}</div>
-            <button onClick={() => del(e.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: colors.danger }}>
-              <Icons.Trash />
-            </button>
-          </div>
-        </div>
-      ))}
-
-      {show && (
-        <Modal title="Add Expense" onClose={() => setShow(false)}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <Field label="Date" half><input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Type *" half>
-              <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} style={inputStyle}>
-                {EXPENSE_TYPES.map(t => <option key={t}>{t}</option>)}
-              </select>
-            </Field>
-            {["Petrol","Diesel","CNG"].includes(form.type) && <>
-              <Field label="Litres" half><input type="number" value={form.litres} onChange={e => setForm(p => ({ ...p, litres: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-              <Field label="Rate/L" half><input type="number" value={form.rate} onChange={e => setForm(p => ({ ...p, rate: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            </>}
-            <Field label="Amount ₹ *" half><input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Vehicle No" half><input value={form.vehicleNo} onChange={e => setForm(p => ({ ...p, vehicleNo: e.target.value }))} style={inputStyle} placeholder="GJ-XX-XXXX" /></Field>
-            <Field label="Driver">
-              <select value={form.driver} onChange={e => setForm(p => ({ ...p, driver: e.target.value }))} style={inputStyle}>
-                <option value="">Select Driver</option>
-                {data.drivers.map(d => <option key={d.id}>{d.name}</option>)}
-              </select>
-            </Field>
-            <Field label="Remark"><input value={form.remark} onChange={e => setForm(p => ({ ...p, remark: e.target.value }))} style={inputStyle} placeholder="Notes..." /></Field>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button onClick={save} style={btnPrimary}>Save Expense</button>
-            <button onClick={() => setShow(false)} style={btnGhost}>Cancel</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-function MaintenancePage({ data, setData }) {
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ date: "", vehicleNo: "", type: "", description: "", cost: "", workshop: "", nextDue: "", remark: "" });
-
-  const save = () => {
-    if (!form.vehicleNo || !form.cost) return alert("Fill required fields");
-    const nd = { ...data, maintenance: [...data.maintenance, { ...form, id: uid() }] };
-    setData(nd); saveData(nd); setShow(false);
-    setForm({ date: "", vehicleNo: "", type: "", description: "", cost: "", workshop: "", nextDue: "", remark: "" });
-  };
-
-  const del = (id) => { if (!confirm("Delete this record?")) return; const nd = { ...data, maintenance: data.maintenance.filter(m => m.id !== id) }; setData(nd); saveData(nd); };
-
-  const types = ["Oil Change", "Tyre Change", "Brake Service", "AC Repair", "Body Work", "Engine Service", "Battery", "Other"];
-  const total = data.maintenance.reduce((s, m) => s + Number(m.cost || 0), 0);
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <StatCard label="Total Service" value={fmt(total)} color={colors.warning} compact sub={`${data.maintenance.length} recs`} />
-        <button onClick={() => setShow(true)} style={{ ...btnPrimary, width: "auto", padding: "12px 16px", borderRadius: 12 }}>
-          <Icons.Plus />
-        </button>
-      </div>
-
-      {data.maintenance.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🔧</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No maintenance records</div>
-        </div>
-      ) : [...data.maintenance].reverse().map(m => (
-        <div key={m.id} style={{ ...cardStyle, padding: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: colors.dark }}>{m.type || "Maintenance"} — {m.vehicleNo}</div>
-              <div style={{ fontSize: 13, color: colors.gray, marginTop: 2 }}>{m.description}</div>
-              <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 4 }}>
-                {m.date && `Date: ${m.date}`} {m.workshop && `· Workshop: ${m.workshop}`} {m.nextDue && `· Next: ${m.nextDue}`}
-              </div>
-              {m.remark && <div style={{ fontSize: 12, color: colors.gray, marginTop: 4, background: "#fefce8", padding: "6px 8px", borderRadius: 6 }}>{m.remark}</div>}
-            </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 8 }}>
-              <div style={{ fontWeight: 800, color: colors.warning, fontSize: 16 }}>{fmt(m.cost)}</div>
-              <button onClick={() => del(m.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: colors.danger }}>
-                <Icons.Trash />
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {show && (
-        <Modal title="Add Service Record" onClose={() => setShow(false)}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <Field label="Date" half><input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Vehicle No *" half><input value={form.vehicleNo} onChange={e => setForm(p => ({ ...p, vehicleNo: e.target.value }))} style={inputStyle} placeholder="GJ-XX-XXXX" /></Field>
-            <Field label="Type" half><select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} style={inputStyle}><option value="">Select</option>{types.map(t => <option key={t}>{t}</option>)}</select></Field>
-            <Field label="Cost ₹ *" half><input type="number" value={form.cost} onChange={e => setForm(p => ({ ...p, cost: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Description"><input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={inputStyle} placeholder="Details..." /></Field>
-            <Field label="Workshop" half><input value={form.workshop} onChange={e => setForm(p => ({ ...p, workshop: e.target.value }))} style={inputStyle} placeholder="Garage name" /></Field>
-            <Field label="Next Due Date" half><input type="date" value={form.nextDue} onChange={e => setForm(p => ({ ...p, nextDue: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Remark"><input value={form.remark} onChange={e => setForm(p => ({ ...p, remark: e.target.value }))} style={inputStyle} placeholder="Notes..." /></Field>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button onClick={save} style={btnPrimary}>Save Record</button>
-            <button onClick={() => setShow(false)} style={btnGhost}>Cancel</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-function DriversPage({ data, setData }) {
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", license: "", licenseExpiry: "", address: "", salary: "", joined: "", remark: "" });
-
-  const save = () => {
-    if (!form.name) return alert("Driver name required");
-    const nd = { ...data, drivers: [...data.drivers, { ...form, id: uid() }] };
-    setData(nd); saveData(nd); setShow(false);
-    setForm({ name: "", phone: "", license: "", licenseExpiry: "", address: "", salary: "", joined: "", remark: "" });
-  };
-
-  const del = (id) => { if (!confirm("Delete this driver?")) return; const nd = { ...data, drivers: data.drivers.filter(d => d.id !== id) }; setData(nd); saveData(nd); };
-
-  const driverTrips = (name) => data.bookings.filter(b => b.driver === name).length;
-  const driverEarnings = (name) => data.bookings.filter(b => b.driver === name).reduce((s, b) => s + Number(b.amount || 0), 0);
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
-        <button onClick={() => setShow(true)} style={{ ...btnPrimary, width: "auto", padding: "12px 18px" }}>
-          <Icons.Plus /> Add Driver
-        </button>
-      </div>
-
-      {data.drivers.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>👤</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No drivers registered</div>
-        </div>
-      ) : data.drivers.map(d => (
-        <div key={d.id} style={{ ...cardStyle, padding: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "center", flex: 1, minWidth: 0 }}>
-              <div style={{ width: 48, height: 48, borderRadius: "50%", background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 20, flexShrink: 0 }}>
-                {d.name[0]?.toUpperCase()}
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 16, color: colors.dark }}>{d.name}</div>
-                <div style={{ fontSize: 12, color: colors.gray }}>{d.phone}</div>
-                <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 1 }}>Lic: {d.license || "—"} {d.licenseExpiry && `(Exp: ${d.licenseExpiry})`}</div>
-              </div>
-            </div>
-            <button onClick={() => del(d.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: colors.danger, flexShrink: 0 }}>
-              <Icons.Trash />
-            </button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 12 }}>
-            {[ ["Salary", fmt(d.salary)], ["Trips", driverTrips(d.name)], ["Revenue", fmt(driverEarnings(d.name))], ["Joined", d.joined || "—"] ].map(([k, v]) => (
-              <div key={k} style={{ background: "#f8fafc", borderRadius: 8, padding: "6px 8px" }}>
-                <div style={{ fontSize: 9, color: colors.grayLight, fontWeight: 700, textTransform: "uppercase" }}>{k}</div>
-                <div style={{ fontSize: 13, color: colors.dark, fontWeight: 700, marginTop: 1 }}>{v}</div>
-              </div>
-            ))}
-          </div>
-          {d.remark && <div style={{ marginTop: 8, fontSize: 12, color: colors.gray }}>📝 {d.remark}</div>}
-        </div>
-      ))}
-
-      {show && (
-        <Modal title="Add Driver" onClose={() => setShow(false)}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <Field label="Name *" half><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="Full name" /></Field>
-            <Field label="Phone" half><input type="tel" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={inputStyle} placeholder="Mobile" /></Field>
-            <Field label="License No" half><input value={form.license} onChange={e => setForm(p => ({ ...p, license: e.target.value }))} style={inputStyle} placeholder="License number" /></Field>
-            <Field label="License Expiry" half><input type="date" value={form.licenseExpiry} onChange={e => setForm(p => ({ ...p, licenseExpiry: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Monthly Salary ₹" half><input type="number" value={form.salary} onChange={e => setForm(p => ({ ...p, salary: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Joining Date" half><input type="date" value={form.joined} onChange={e => setForm(p => ({ ...p, joined: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Address"><input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} style={inputStyle} placeholder="Full address" /></Field>
-            <Field label="Remark"><input value={form.remark} onChange={e => setForm(p => ({ ...p, remark: e.target.value }))} style={inputStyle} placeholder="Notes..." /></Field>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button onClick={save} style={btnPrimary}>Save Driver</button>
-            <button onClick={() => setShow(false)} style={btnGhost}>Cancel</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-function CommissionsPage({ data, setData }) {
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ date: "", agent: "", booking: "", amount: "", percent: "", remark: "", paid: false });
-
-  const save = () => {
-    if (!form.agent || !form.amount) return alert("Fill required fields");
-    const nd = { ...data, commissions: [...data.commissions, { ...form, id: uid() }] };
-    setData(nd); saveData(nd); setShow(false);
-    setForm({ date: "", agent: "", booking: "", amount: "", percent: "", remark: "", paid: false });
-  };
-
-  const del = (id) => { if (!confirm("Delete this commission?")) return; const nd = { ...data, commissions: data.commissions.filter(c => c.id !== id) }; setData(nd); saveData(nd); };
-  const toggle = (id) => {
-    const nd = { ...data, commissions: data.commissions.map(c => c.id === id ? { ...c, paid: !c.paid } : c) };
-    setData(nd); saveData(nd);
-  };
-
-  const totalComm = data.commissions.reduce((s, c) => s + Number(c.amount || 0), 0);
-  const paidComm = data.commissions.filter(c => c.paid).reduce((s, c) => s + Number(c.amount || 0), 0);
-
-  return (
-    <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
-        <StatCard label="Total" value={fmt(totalComm)} color={colors.purple} compact />
-        <StatCard label="Paid" value={fmt(paidComm)} color={colors.primary} compact />
-        <StatCard label="Pending" value={fmt(totalComm - paidComm)} color={colors.danger} compact />
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
-        <button onClick={() => setShow(true)} style={{ ...btnPrimary, width: "auto", padding: "12px 18px" }}>
-          <Icons.Plus /> Add Commission
-        </button>
-      </div>
-
-      {data.commissions.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>%</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No commissions recorded</div>
-        </div>
-      ) : [...data.commissions].reverse().map(c => (
-        <div key={c.id} style={{ ...cardStyle, padding: 14, borderColor: c.paid ? "#bbf7d0" : "#fecaca" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: colors.dark }}>{c.agent}</div>
-              <div style={{ fontSize: 12, color: colors.gray, marginTop: 1 }}>{c.date} {c.booking && `· ${c.booking}`} {c.percent && `· ${c.percent}%`}</div>
-              {c.remark && <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 2 }}>{c.remark}</div>}
-            </div>
-            <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0, marginLeft: 8 }}>
-              <div style={{ fontWeight: 800, color: colors.purple, fontSize: 15 }}>{fmt(c.amount)}</div>
-              <button onClick={() => toggle(c.id)} style={{ background: c.paid ? "#dcfce7" : "#fef9c3", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: c.paid ? "#16a34a" : "#ca8a04", whiteSpace: "nowrap" }}>
-                {c.paid ? "Paid ✓" : "Pending"}
-              </button>
-              <button onClick={() => del(c.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: colors.danger }}>
-                <Icons.Trash />
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {show && (
-        <Modal title="Add Commission" onClose={() => setShow(false)}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <Field label="Date" half><input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} /></Field>
-            <Field label="Agent Name *" half><input value={form.agent} onChange={e => setForm(p => ({ ...p, agent: e.target.value }))} style={inputStyle} placeholder="Agent name" /></Field>
-            <Field label="Amount ₹ *" half><input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Commission %" half><input type="number" value={form.percent} onChange={e => setForm(p => ({ ...p, percent: e.target.value }))} style={inputStyle} placeholder="0" /></Field>
-            <Field label="Booking Ref"><input value={form.booking} onChange={e => setForm(p => ({ ...p, booking: e.target.value }))} style={inputStyle} placeholder="Reference" /></Field>
-            <Field label="Remark"><input value={form.remark} onChange={e => setForm(p => ({ ...p, remark: e.target.value }))} style={inputStyle} placeholder="Notes..." /></Field>
-          </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button onClick={save} style={btnPrimary}>Save Commission</button>
-            <button onClick={() => setShow(false)} style={btnGhost}>Cancel</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-
-function BillsPage({ data }) {
-  const [booking, setBooking] = useState(null);
-  const printRef = useRef();
-
-  const print = () => {
-    const w = window.open("", "_blank");
-    w.document.write(`<html><head><title>Bill - Maa Travels</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>
-      body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;color:#1e293b;max-width:400px;margin:0 auto;background:#fff}
-      h1{color:#1a6b3a;margin:0;font-size:24px}
-      .header{text-align:center;border-bottom:3px double #1a6b3a;padding-bottom:16px;margin-bottom:16px}
-      .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:14px}
-      .total{background:#f0fdf4;padding:12px;border-radius:8px;margin-top:16px}
-      .footer{text-align:center;margin-top:20px;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;padding-top:12px}
-      .amount{font-weight:800;color:#1a6b3a;font-size:16px}
-      .due{font-weight:800;color:#dc2626;font-size:16px}
-      @media print{button{display:none}}
-    </style></head><body>
-    <div class="header">
-      <h1>🚌 Maa Travels</h1>
-      <p style="margin:4px 0;color:#64748b;font-size:14px">Travel Receipt / Bill</p>
-      <p style="margin:4px 0;font-size:12px;color:#94a3b8">Bill No: MT-${booking.id.slice(-6).toUpperCase()} | Date: ${new Date().toLocaleDateString("en-IN")}</p>
-    </div>
-    <div class="row"><span><b>Client Name</b></span><span>${booking.clientName}</span></div>
-    <div class="row"><span><b>Phone</b></span><span>${booking.phone || "—"}</span></div>
-    <div class="row"><span><b>Journey From</b></span><span>${booking.from}</span></div>
-    <div class="row"><span><b>Journey To</b></span><span>${booking.to}</span></div>
-    <div class="row"><span><b>Journey Date</b></span><span>${booking.date || "—"}</span></div>
-    <div class="row"><span><b>Return Date</b></span><span>${booking.returnDate || "—"}</span></div>
-    <div class="row"><span><b>Vehicle</b></span><span>${booking.vehicle || "—"} (${booking.vehicleNo || "—"})</span></div>
-    <div class="row"><span><b>Driver</b></span><span>${booking.driver || "—"}</span></div>
-    <div class="row"><span><b>Passengers</b></span><span>${booking.passengers || "—"}</span></div>
-    ${booking.remark ? `<div class="row"><span><b>Remarks</b></span><span>${booking.remark}</span></div>` : ""}
-    <div class="total">
-      <div class="row"><span><b>Total Amount</b></span><span class="amount">₹${Number(booking.amount).toLocaleString("en-IN")}</b></span></div>
-      <div class="row"><span>Advance Paid</span><span>₹${Number(booking.advance || 0).toLocaleString("en-IN")}</span></div>
-      <div class="row"><span><b>Balance Due</b></span><span class="due">₹${(Number(booking.amount) - Number(booking.advance || 0)).toLocaleString("en-IN")}</b></span></div>
-    </div>
-    <div class="footer">
-      <p>Thank you for choosing Maa Travels!</p>
-      <p>This is a computer generated bill.</p>
-    </div>
-    </body></html>`);
-    w.document.close(); w.print();
-  };
-
-  return (
-    <div>
-      <div style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>Select a booking to generate bill/receipt.</div>
-      {data.bookings.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 50, color: colors.grayLight }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🧾</div>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>No bookings available</div>
-        </div>
-      ) : data.bookings.map(b => (
-        <div key={b.id} onClick={() => setBooking(b === booking ? null : b)} style={{
-          background: booking?.id === b.id ? "#f0fdf4" : colors.white,
-          border: `1px solid ${booking?.id === b.id ? "#86efac" : "#e2e8f0"}`,
-          borderRadius: 12, padding: "12px 14px", marginBottom: 10, cursor: "pointer",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: colors.dark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{b.clientName}</div>
-            <div style={{ fontSize: 12, color: colors.gray }}>{b.from} → {b.to} · {b.date}</div>
-          </div>
-          <div style={{ fontWeight: 800, color: colors.primary, fontSize: 14, flexShrink: 0, marginLeft: 8 }}>{fmt(b.amount)}</div>
-        </div>
-      ))}
-
-      {booking && (
-        <div style={{ background: colors.white, border: "2px solid #86efac", borderRadius: 16, padding: 20, marginTop: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }} ref={printRef}>
-          <div style={{ textAlign: "center", marginBottom: 16, borderBottom: "2px solid #1a6b3a", paddingBottom: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 4 }}>
-              <Icons.Bus />
-              <h2 style={{ margin: 0, color: colors.primary, fontSize: 20 }}>Maa Travels</h2>
-            </div>
-            <div style={{ fontSize: 12, color: colors.gray }}>Travel Receipt / Invoice</div>
-            <div style={{ fontSize: 11, color: colors.grayLight, marginTop: 2 }}>Bill No: MT-{booking.id.slice(-6).toUpperCase()} · {new Date().toLocaleDateString("en-IN")}</div>
-          </div>
-          {[["Client", booking.clientName], ["Phone", booking.phone || "—"], ["From", booking.from], ["To", booking.to], ["Date", booking.date || "—"], ["Return", booking.returnDate || "—"], ["Vehicle", `${booking.vehicle || "—"} (${booking.vehicleNo || "—"})`], ["Driver", booking.driver || "—"], ["Passengers", booking.passengers || "—"]].map(([k, v]) => (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #f1f5f9" }}>
-              <span style={{ color: colors.gray, fontSize: 13 }}>{k}</span>
-              <span style={{ fontWeight: 700, color: colors.dark, fontSize: 13, textAlign: "right" }}>{v}</span>
-            </div>
-          ))}
-          <div style={{ background: "#f0fdf4", borderRadius: 12, padding: 14, marginTop: 14 }}>
-            {[["Total Amount", fmt(booking.amount), colors.primary, true], ["Advance Paid", fmt(booking.advance), colors.dark, false], ["Balance Due", fmt(Number(booking.amount) - Number(booking.advance || 0)), colors.danger, true]].map(([k, v, c, bold]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0" }}>
-                <span style={{ fontSize: 13, fontWeight: bold ? 700 : 400, color: colors.dark }}>{k}</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color: c }}>{v}</span>
-              </div>
-            ))}
-          </div>
-          {booking.remark && <div style={{ marginTop: 10, background: "#fefce8", borderRadius: 8, padding: 10, fontSize: 13, color: "#713f12" }}>Remarks: {booking.remark}</div>}
-          <div style={{ textAlign: "center", marginTop: 12 }}>
-            <div style={{ fontSize: 11, color: colors.grayLight }}>Thank you for choosing Maa Travels! 🙏</div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 14 }}>
-            <button onClick={print} style={{ ...btnPrimary, width: "auto", padding: "12px 20px", fontSize: 14 }}>
-              <Icons.Printer /> Print / Download
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ProfitPage({ data }) {
-  const totalIncome = data.bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
-  const fuelCost = data.expenses.filter(e => ["Petrol","Diesel","CNG"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-  const tollCost = data.expenses.filter(e => ["Toll","Parking"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-  const driverExpCost = data.expenses.filter(e => e.type === "Driver Expense").reduce((s, e) => s + Number(e.amount || 0), 0);
-  const otherExp = data.expenses.filter(e => !["Petrol","Diesel","CNG","Toll","Parking","Driver Expense"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-  const maintCost = data.maintenance.reduce((s, m) => s + Number(m.cost || 0), 0);
-  const commCost = data.commissions.reduce((s, c) => s + Number(c.amount || 0), 0);
-  const driverSalaries = data.drivers.reduce((s, d) => s + Number(d.salary || 0), 0);
-  const totalExpenses = fuelCost + tollCost + driverExpCost + otherExp + maintCost + commCost + driverSalaries;
-  const profit = totalIncome - totalExpenses;
-  const margin = totalIncome > 0 ? ((profit / totalIncome) * 100).toFixed(1) : 0;
-
-  const rows = [
-    ["💰 Income", totalIncome, colors.primary, true],
-    ["⛽ Fuel", fuelCost, "#dc2626", false],
-    ["🛣️ Toll & Parking", tollCost, "#b45309", false],
-    ["👤 Driver Exp", driverExpCost, colors.purple, false],
-    ["🔧 Maintenance", maintCost, colors.info, false],
-    ["💼 Commissions", commCost, colors.warning, false],
-    ["💵 Salaries", driverSalaries, colors.dark, false],
-    ["📦 Other", otherExp, colors.gray, false],
+  const navLinks = [
+    { label: 'Destinations', href: '#destinations' },
+    { label: 'Services', href: '#services' },
+    { label: 'Packages', href: '#packages' },
+    { label: 'About', href: '#about' },
+    { label: 'Contact', href: '#contact' },
   ];
 
   return (
-    <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 20 }}>
-        <StatCard label="Income" value={fmt(totalIncome)} color={colors.primary} compact />
-        <StatCard label="Expenses" value={fmt(totalExpenses)} color={colors.danger} compact />
-        <StatCard label={profit >= 0 ? "Profit" : "Loss"} value={fmt(Math.abs(profit))} color={profit >= 0 ? colors.primary : colors.danger} compact />
-        <StatCard label="Margin" value={`${margin}%`} color={profit >= 0 ? colors.primary : colors.danger} compact />
-      </div>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? 'bg-black/90 backdrop-blur-2xl border-b border-white/[0.08] py-2' : 'py-3 md:py-5'
+      }`}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between">
+        <a href="#home" className="flex items-center gap-2 md:gap-3">
+          <img src="/images/logo.webp" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+          <span className="font-playfair text-base md:text-xl text-white tracking-wide">
+            Maa <span className="text-red">Travels</span>
+          </span>
+        </a>
 
-      <div style={{ ...cardStyle, padding: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: colors.dark, marginBottom: 14, textTransform: "uppercase", letterSpacing: 0.6 }}>Detailed Breakdown</div>
-        {rows.map(([label, val, color, bold]) => (
-          <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid #f1f5f9" }}>
-            <span style={{ fontSize: 13, color: colors.dark, fontWeight: bold ? 700 : 400 }}>{label}</span>
-            <span style={{ fontWeight: 800, color, fontSize: 14, minWidth: 80, textAlign: "right" }}>{fmt(val)}</span>
-          </div>
-        ))}
-        <div style={{ marginTop: 14, padding: "12px 14px", background: profit >= 0 ? "#f0fdf4" : "#fef2f2", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 800, fontSize: 15, color: colors.dark }}>{profit >= 0 ? "✅ Net Profit" : "❌ Net Loss"}</span>
-          <span style={{ fontWeight: 900, fontSize: 20, color: profit >= 0 ? colors.primary : colors.danger }}>{fmt(Math.abs(profit))}</span>
+        {/* Desktop Nav */}
+        <ul className="hidden lg:flex items-center gap-7 xl:gap-9">
+          {navLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                className="relative text-[11px] tracking-[2px] uppercase text-white/60 hover:text-red-light transition-colors duration-300 group"
+              >
+                {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-red transition-all duration-300 group-hover:w-full" />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden lg:block">
+          <a href="#booking" className="btn-3d-wrapper">
+            <span className="btn-3d inline-block bg-red text-white px-5 md:px-6 py-2.5 md:py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm cursor-pointer">
+              Book Now
+            </span>
+          </a>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function AISummaryPage({ data }) {
-  const [summary, setSummary] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const generateSummary = () => {
-    setLoading(true);
-    setSummary("");
-
-    setTimeout(() => {
-      const totalIncome = data.bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
-      const totalExpenses = data.expenses.reduce((s, e) => s + Number(e.amount || 0), 0)
-        + data.maintenance.reduce((s, m) => s + Number(m.cost || 0), 0)
-        + data.commissions.reduce((s, c) => s + Number(c.amount || 0), 0)
-        + data.drivers.reduce((s, d) => s + Number(d.salary || 0), 0);
-      const profit = totalIncome - totalExpenses;
-      const margin = totalIncome > 0 ? ((profit / totalIncome) * 100).toFixed(1) : 0;
-
-      const fuelCost = data.expenses.filter(e => ["Petrol","Diesel","CNG"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-      const cngCost = data.expenses.filter(e => e.type === "CNG").reduce((s, e) => s + Number(e.amount || 0), 0);
-      const tollCost = data.expenses.filter(e => ["Toll","Parking"].includes(e.type)).reduce((s, e) => s + Number(e.amount || 0), 0);
-      const maintCost = data.maintenance.reduce((s, m) => s + Number(m.cost || 0), 0);
-      const commCost = data.commissions.reduce((s, c) => s + Number(c.amount || 0), 0);
-      const pendingComm = data.commissions.filter(c => !c.paid).reduce((s, c) => s + Number(c.amount || 0), 0);
-
-      const topDriver = data.drivers.map(d => ({
-        name: d.name,
-        trips: data.bookings.filter(b => b.driver === d.name).length,
-        rev: data.bookings.filter(b => b.driver === d.name).reduce((s, b) => s + Number(b.amount || 0), 0)
-      })).sort((a, b) => b.trips - a.trips)[0];
-
-      const topRoute = (() => {
-        const routes = {};
-        data.bookings.forEach(b => {
-          const r = `${b.from} → ${b.to}`;
-          routes[r] = (routes[r] || 0) + 1;
-        });
-        const sorted = Object.entries(routes).sort((a, b) => b[1] - a[1]);
-        return sorted[0];
-      })();
-
-      const totalBalance = data.bookings.reduce((s, b) => s + (Number(b.amount || 0) - Number(b.advance || 0)), 0);
-      const avgBookingVal = data.bookings.length > 0 ? (totalIncome / data.bookings.length).toFixed(0) : 0;
-      const health = profit > 0 && margin > 20 ? "HEALTHY ✅" : profit > 0 ? "MODERATE ⚠️" : "CRITICAL ❌";
-      const now = new Date();
-      const upcomingMaint = data.maintenance.filter(m => m.nextDue && new Date(m.nextDue) > now).length;
-
-      setSummary(`
-════════════════════════════════════════
-   🚌 MAA TRAVELS — BUSINESS SUMMARY
-   ${now.toLocaleDateString("en-IN")} ${now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
-════════════════════════════════════════
-
-📊 FINANCIAL OVERVIEW
-─────────────────────
-Total Income        : ₹${totalIncome.toLocaleString("en-IN")}
-Total Expenditure   : ₹${totalExpenses.toLocaleString("en-IN")}
-Net ${profit >= 0 ? "Profit" : "Loss"}         : ₹${Math.abs(profit).toLocaleString("en-IN")}
-Profit Margin       : ${margin}%
-Business Health     : ${health}
-
-💰 INCOME DETAILS
-─────────────────
-Total Bookings      : ${data.bookings.length}
-Avg Booking Value   : ₹${Number(avgBookingVal).toLocaleString("en-IN")}
-Total Advance Recvd : ₹${data.bookings.reduce((s,b)=>s+Number(b.advance||0),0).toLocaleString("en-IN")}
-Pending Balance     : ₹${totalBalance.toLocaleString("en-IN")}
-
-⛽ EXPENSE BREAKDOWN
-────────────────────
-Fuel (Petrol/Diesel): ₹${(fuelCost - cngCost).toLocaleString("en-IN")}
-CNG                 : ₹${cngCost.toLocaleString("en-IN")}
-Toll & Parking      : ₹${tollCost.toLocaleString("en-IN")}
-Maintenance         : ₹${maintCost.toLocaleString("en-IN")}
-Commissions (Total) : ₹${commCost.toLocaleString("en-IN")}
-Commissions Pending : ₹${pendingComm.toLocaleString("en-IN")}
-Driver Salaries     : ₹${data.drivers.reduce((s,d)=>s+Number(d.salary||0),0).toLocaleString("en-IN")} /mo
-
-👤 DRIVERS & FLEET
-──────────────────
-Total Drivers       : ${data.drivers.length}
-${topDriver ? `Top Driver          : ${topDriver.name} (${topDriver.trips} trips, ₹${topDriver.rev.toLocaleString("en-IN")} rev)` : "Top Driver          : N/A"}
-${topRoute ? `Most Popular Route  : ${topRoute[0]} (${topRoute[1]} times)` : "Most Popular Route  : N/A"}
-
-🔧 MAINTENANCE
-───────────────
-Total Records       : ${data.maintenance.length}
-Upcoming Due        : ${upcomingMaint} service(s)
-
-💡 INSIGHTS
-───────────
-${profit < 0 ? "⚠️  Business is at a LOSS. Review costs immediately." : "✅  Business is profitable."}
-${pendingComm > 0 ? `⚠️  ₹${pendingComm.toLocaleString("en-IN")} commission pending.` : "✅  All commissions cleared."}
-${totalBalance > totalIncome * 0.3 ? "⚠️  High pending balance — follow up on payments." : "✅  Payment collection on track."}
-${upcomingMaint > 0 ? `🔧  ${upcomingMaint} maintenance due — schedule promptly.` : "✅  No immediate maintenance due."}
-${fuelCost > totalIncome * 0.4 ? "⚠️  Fuel costs exceed 40% of income." : ""}
-${margin > 20 ? "📈  Excellent profit margin!" : margin > 0 ? "📊  Optimize expenses for better margin." : ""}
-
-════════════════════════════════════════
-      `.trim());
-      setLoading(false);
-    }, 1800);
-  };
-
-  return (
-    <div>
-      <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 60%, #16a34a 100%)`, borderRadius: 16, padding: 24, marginBottom: 20, color: "#fff", textAlign: "center", boxShadow: "0 8px 24px rgba(26,107,58,0.3)" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-          <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: 14, padding: 12 }}>
-            <Icons.AI />
-          </div>
-        </div>
-        <h2 style={{ margin: "0 0 6px", fontSize: 20 }}>AI Business Summary</h2>
-        <p style={{ margin: "0 0 16px", fontSize: 13, opacity: 0.85 }}>Analyzes all data & generates a business report.</p>
-        <button onClick={generateSummary} disabled={loading} style={{
-          background: loading ? "rgba(255,255,255,0.3)" : "#fff",
-          color: loading ? "#fff" : colors.primary,
-          border: "none",
-          borderRadius: 12,
-          padding: "12px 24px",
-          fontWeight: 800,
-          fontSize: 14,
-          cursor: loading ? "not-allowed" : "pointer",
-          boxShadow: loading ? "none" : "0 4px 16px rgba(0,0,0,0.15)",
-          transition: "all 0.2s",
-          fontFamily: "inherit",
-        }}>
-          {loading ? "⏳ Analyzing..." : "✨ Generate Summary"}
+        {/* Mobile menu button */}
+        <button
+          className="lg:hidden text-white p-2"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {loading && (
-        <div style={{ textAlign: "center", padding: 40 }}>
-          <div style={{ fontSize: 36, animation: "spin 1.5s linear infinite", display: "inline-block" }}>⚙️</div>
-          <div style={{ color: colors.gray, marginTop: 10, fontSize: 13 }}>Analyzing {data.bookings.length} bookings, {data.expenses.length} expenses...</div>
+      {/* Mobile Nav */}
+      {menuOpen && (
+        <div className="lg:hidden bg-black/95 backdrop-blur-xl border-t border-white/[0.08] px-6 py-6 max-h-[80vh] overflow-y-auto">
+          <ul className="flex flex-col gap-5">
+            {navLinks.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm tracking-[2px] uppercase text-white/70 hover:text-red-light transition-colors block py-2"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            <li className="pt-2">
+              <a href="#booking" onClick={() => setMenuOpen(false)} className="btn-3d-wrapper inline-block">
+                <span className="btn-3d inline-block bg-red text-white px-6 py-3 text-[11px] tracking-[2px] uppercase font-inter font-medium rounded-sm">
+                  Book Now
+                </span>
+              </a>
+            </li>
+          </ul>
         </div>
       )}
+    </nav>
+  );
+}
 
-      {summary && (
-        <div style={{
-          background: "#0f1117",
-          borderRadius: 14,
-          padding: 16,
-          fontFamily: "'SF Mono', 'Courier New', monospace",
-          fontSize: 12,
-          lineHeight: 1.7,
-          color: "#e2e8f0",
-          whiteSpace: "pre-wrap",
-          boxShadow: "inset 0 2px 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.15)",
-          border: "1px solid #1e293b",
-          overflowX: "auto",
-        }}>
-          <div style={{ color: "#4ade80", marginBottom: 4, fontSize: 10, textTransform: "uppercase", letterSpacing: 2 }}>// INTERNAL AI</div>
-          {summary.split("\n").map((line, i) => {
-            const lineColor = line.startsWith("════") ? "#4ade80" :
-              line.startsWith("📊") || line.startsWith("💰") || line.startsWith("⛽") || line.startsWith("👤") || line.startsWith("🔧") || line.startsWith("💡") ? "#60a5fa" :
-              line.startsWith("✅") ? "#4ade80" :
-              line.startsWith("⚠️") ? "#fbbf24" :
-              line.startsWith("❌") ? "#f87171" :
-              line.startsWith("📈") || line.startsWith("📊") || line.startsWith("🔧") ? "#a78bfa" :
-              line.startsWith("─") ? "#334155" :
-              "#e2e8f0";
-            return <div key={i} style={{ color: lineColor }}>{line || " "}</div>;
-          })}
+/* ─── Hero ─── */
+function Hero({ splashDone }: { splashDone: boolean }) {
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!splashDone) return;
+
+    // Inject preload for hero video once splash ends
+    const supportsWebM = (() => {
+      const v = document.createElement('video');
+      return v.canPlayType('video/webm; codecs="vp9"') !== '';
+    })();
+    const heroSrc = supportsWebM ? '/videos/hero_travel.webm' : '/videos/hero_travel.mp4';
+    if (!document.querySelector(`link[href="${heroSrc}"]`)) {
+      const link = document.createElement('link');
+      link.rel  = 'preload';
+      link.href = heroSrc;
+      link.as   = 'video';
+      link.setAttribute('type', supportsWebM ? 'video/webm' : 'video/mp4');
+      document.head.appendChild(link);
+    }
+
+    if (heroVideoRef.current) {
+      heroVideoRef.current.play().catch(() => {});
+    }
+  }, [splashDone]);
+
+  return (
+    <section id="home" className="relative min-h-[100dvh] flex items-center overflow-hidden">
+      <div className="absolute inset-0">
+        <video
+  ref={heroVideoRef}
+  muted
+  loop
+  playsInline
+  className="w-full h-full object-cover"
+>
+  <source src="/videos/hero_travel.webm" type="video/webm" />
+  <source src="/videos/hero_travel.mp4"  type="video/mp4" />
+</video>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-red/5 blur-[80px] md:blur-[100px] -top-12 -right-12 md:-top-24 md:-right-24 animate-orbFloat" />
+        <div className="absolute w-[200px] h-[200px] md:w-[400px] md:h-[400px] rounded-full bg-red/3 blur-[60px] md:blur-[80px] bottom-0 -left-12 animate-orbFloat" style={{ animationDelay: '-3s' }} />
+        <div className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] rounded-full bg-white/3 blur-[40px] md:blur-[60px] top-1/3 left-1/3 animate-orbFloat" style={{ animationDelay: '-5s' }} />
+      </div>
+
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 70% 70% at 60% 50%, black 30%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 60% 50%, black 30%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 pt-20 md:pt-24">
+        <div className="max-w-[800px]">
+          <div className="mb-5 md:mb-8 opacity-0 animate-fadeSlideUp text-[10px] md:text-[11px]">
+            <span className="w-1.5 h-1.5 bg-red rounded-full pulse-dot mr-2" />
+            Bhuj · Gujarat · Est. 2010+
+          </div>
+
+          <h1 className="font-playfair text-[clamp(32px,8vw,84px)] font-normal leading-[1.05] tracking-tight text-white mb-4 md:mb-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.2s' }}>
+            Journey Beyond<br />
+            <em className="text-red not-italic">Every Horizon</em>
+            <span className="block ml-0 md:ml-14 mt-1">You Dream</span>
+          </h1>
+
+          <p className="text-[13px] md:text-[15px] text-white/60 leading-[1.8] max-w-[480px] mb-8 md:mb-10 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.4s' }}>
+            India's most treasured landscapes await. From the salt flats of Kutch to the snowy peaks of Himachal — we craft journeys that become memories for a lifetime.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.6s' }}>
+            <a href="#packages" className="btn-3d-wrapper">
+              <span className="btn-3d inline-block bg-red text-white px-6 md:px-8 py-3.5 md:py-4 text-[11px] md:text-[12px] tracking-[2px] uppercase font-inter font-medium rounded-sm cursor-pointer">
+                Explore Packages
+              </span>
+            </a>
+            
+          </div>
         </div>
-      )}
+      </div>
+    
+      {/* Stats - positioned at bottom right */}
+      <div className="absolute right-4 md:right-12 bottom-16 md:bottom-10 z-10 flex flex-row md:flex-col gap-4 md:gap-5 opacity-0 animate-fadeSlideUp" style={{ animationDelay: '0.8s' }}>
+        {[
+          { num: '10+', label: 'Years of Trust' },
+          { num: '5K+', label: 'Happy Travellers' },
+          { num: '50+', label: 'Destinations' },
+        ].map((stat) => (
+          <div key={stat.label} className="text-center md:text-right">
+            <div className="font-playfair text-[28px] md:text-[42px] font-light text-red leading-none">{stat.num}</div>
+            <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50 mt-0.5 md:mt-1">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+</section>
+  );
+}
 
-      <style>{`@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }`}</style>
+/* ─── Marquee ─── */
+function Marquee() {
+  const items = [
+    'Saurashtra Darshan', 'Kutch Desert Festival', 'Goa Beach Escape',
+    'Himachal Snow Retreat', 'Char Dham Yatra', 'Rajasthan Royal Tour',
+    'Gujarat Heritage Circuit', 'Corporate Tours &amp; Events',
+  ];
+
+  return (
+    <div className="bg-red-pale border-y border-red/20 py-4 md:py-5 overflow-hidden whitespace-nowrap">
+      <div className="marquee-track inline-flex">
+        {[...items, ...items].map((item, i) => (
+          <span key={i} className="font-playfair text-[11px] md:text-[13px] tracking-[3px] uppercase text-red-light px-6 md:px-10">
+            {item}
+            <span className="text-red ml-6 md:ml-10">✦</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
-// ─── App Shell ────────────────────────────────────────────────────────────────
-export default function App() {
-  const [data, setData] = useState(loadData);
-  const [page, setPage] = useState("dashboard");
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const pageLabels = { dashboard: "Dashboard", bookings: "Bookings", expenses: "Fuel & Tolls", maintenance: "Maintenance", drivers: "Drivers", commissions: "Commissions", bills: "Bill Generator", profit: "Profit / Loss", ai: "AI Summary" };
-
-  const pages = {
-    dashboard: <Dashboard data={data} />,
-    bookings: <BookingsPage data={data} setData={setData} />,
-    expenses: <ExpensesPage data={data} setData={setData} />,
-    maintenance: <MaintenancePage data={data} setData={setData} />,
-    drivers: <DriversPage data={data} setData={setData} />,
-    commissions: <CommissionsPage data={data} setData={setData} />,
-    bills: <BillsPage data={data} />,
-    profit: <ProfitPage data={data} />,
-    ai: <AISummaryPage data={data} />,
-  };
+/* ─── Destinations ─── */
+function Destinations() {
+  const destinations = [
+    { name: 'Saurashtra Darshan', tag: 'Cultural Heritage', desc: "Ancient temples, folk traditions and artistic heritage of Gujarat's heartland.", img: '/images/saurashtra.webp' },
+    { name: 'Rann of Kutch', tag: 'Desert Wonder', desc: "The world's largest salt desert shimmers under the moonlight.", img: '/images/kutch.webp' },
+    { name: 'Goa Paradise', tag: 'Beach &amp; Sun', desc: "Endless beaches and vibrant nightlife on India's sunny coast.", img: '/images/goa.webp' },
+    { name: 'Himachal Pradesh', tag: 'Mountain Escape', desc: 'Snow-capped peaks and valley meadows await the bold explorer.', img: '/images/himachal.webp' },
+    { name: 'Rajasthan Royale', tag: 'Royal Legacy', desc: "Palaces, forts and golden sands of India's most regal state.", img: '/images/rajasthan.webp' },
+    { name: 'Gujarat Splendour', tag: 'Jain Heritage', desc: 'Magnificent temples, wildlife and coastal wonders of Gujarat.', img: '/images/gujarat.webp' },
+  ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f1f5f9", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", paddingBottom: 80 }}>
-      {/* Mobile Header */}
-      <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`, boxShadow: "0 4px 16px rgba(26,107,58,0.3)", position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 56, padding: "0 16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: 10, padding: 6 }}>
-              <Icons.Bus />
+    <section id="destinations" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-14 reveal">
+          <div>
+            <div className="section-label mb-3 md:mb-4">Our Destinations</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+              India's Most <em>Breathtaking</em><br className="hidden md:block" /> Corners Await You
+            </h2>
+          </div>
+          <a href="#packages" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
+            <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
+              <ArrowRight size={16} />
+            </span>
+            All Destinations
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4">
+          <div className="dest-card sm:col-span-2 lg:col-span-6 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up">
+            <img
+              src={destinations[0].img}
+              srcSet={`${destinations[0].img.replace('.webp','-400.webp')} 400w, ${destinations[0].img.replace('.webp','-800.webp')} 800w, ${destinations[0].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
+              alt={destinations[0].name}
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[0].tag}</span>
+              <h3 className="font-playfair text-[22px] md:text-[clamp(22px,2.5vw,32px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[0].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[0].desc}</p>
             </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#fff", lineHeight: 1.1 }}>Maa Travels</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>Business Manager</div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
             </div>
           </div>
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10, padding: "8px 10px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-            ☰ Menu
-          </button>
-        </div>
-      </div>
 
-      {/* Menu Overlay */}
-      {menuOpen && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200, display: "flex", justifyContent: "flex-end" }} onClick={() => setMenuOpen(false)}>
-          <div style={{ background: "#fff", width: "75%", maxWidth: 280, height: "100%", padding: "20px 0", boxShadow: "-4px 0 24px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
-            <div style={{ padding: "0 20px 16px", borderBottom: "1px solid #f1f5f9", marginBottom: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, borderRadius: 10, padding: 6 }}>
-                  <Icons.Bus />
-                </div>
-                <div style={{ fontWeight: 800, fontSize: 16, color: colors.dark }}>Maa Travels</div>
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-1">
+            <img
+              src={destinations[1].img}
+              srcSet={`${destinations[1].img.replace('.webp','-400.webp')} 400w, ${destinations[1].img.replace('.webp','-800.webp')} 800w, ${destinations[1].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 600px"
+              alt={destinations[1].name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[1].tag}</span>
+              <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[1].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[1].desc}</p>
+            </div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
+            </div>
+          </div>
+
+          <div className="dest-card lg:col-span-3 h-[300px] md:h-[420px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-2">
+            <img
+              src={destinations[2].img}
+              srcSet={`${destinations[2].img.replace('.webp','-400.webp')} 400w, ${destinations[2].img.replace('.webp','-800.webp')} 800w, ${destinations[2].img} 1200w`}
+              sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 600px"
+              alt={destinations[2].name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+              <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{destinations[2].tag}</span>
+              <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{destinations[2].name}</h3>
+              <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{destinations[2].desc}</p>
+            </div>
+            <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+              <ArrowRight size={14} className="text-white" />
+            </div>
+          </div>
+
+          {destinations.slice(3).map((dest, i) => (
+            <div key={dest.name} className={`dest-card sm:col-span-1 lg:col-span-4 h-[240px] md:h-[320px] relative overflow-hidden rounded cursor-pointer group card-3d reveal-up reveal-delay-${i + 1}`}>
+              <img
+              src={dest.img}
+              srcSet={`${dest.img.replace('.webp','-400.webp')} 400w, ${dest.img.replace('.webp','-800.webp')} 800w, ${dest.img} 1200w`}
+              sizes="(max-width: 640px) 400px, 600px"
+              alt={dest.name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-75"
+            />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                <span className="inline-block glass-card px-2.5 md:px-3 py-1 text-[8px] md:text-[9px] tracking-[2px] uppercase text-red-light rounded-sm mb-2 md:mb-3">{dest.tag}</span>
+                <h3 className="font-playfair text-[20px] md:text-[clamp(20px,2vw,28px)] font-normal leading-tight text-white whitespace-pre-line">{dest.name}</h3>
+                <p className="text-[11px] md:text-[12px] text-white/60 mt-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[80px] group-hover:opacity-100 transition-all duration-400">{dest.desc}</p>
+              </div>
+              <div className="absolute top-5 right-5 md:top-6 md:right-6 w-8 h-8 md:w-9 md:h-9 rounded-full glass-card flex items-center justify-center -rotate-45 opacity-0 group-hover:opacity-100 group-hover:rotate-0 transition-all duration-300">
+                <ArrowRight size={14} className="text-white" />
               </div>
             </div>
-            {NAV.map(n => (
-              <button key={n.key} onClick={() => { setPage(n.key); setMenuOpen(false); }} style={{
-                display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 20px",
-                background: page === n.key ? "#f0fdf4" : "transparent",
-                border: "none", borderLeft: `4px solid ${page === n.key ? colors.primary : "transparent"}`,
-                cursor: "pointer", textAlign: "left",
-                fontSize: 15, color: page === n.key ? colors.primary : colors.dark, fontWeight: page === n.key ? 700 : 500,
-                fontFamily: "inherit",
-              }}>
-                <n.icon /> {n.label}
-              </button>
-            ))}
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Services ─── */
+function Services() {
+  const services = [
+    { icon: <MapPin size={22} />, title: 'Custom Tour Packages', desc: 'Tailor-made itineraries for families, friends and corporates. From budget getaways to luxury escapes - designed around your dreams.', link: '#packages' },
+    { icon: <Car size={22} />, title: 'Premium Taxi &amp; Cab Service', desc: 'Comfortable, sanitized vehicles with experienced, courteous drivers for airport transfers, local sightseeing and intercity travel.', link: '#booking' },
+    { icon: <Plane size={22} />, title: 'Airport Pick & Drop', desc: 'Punctual, comfortable airport transfers to and from all major airports. Flight tracking, meet & greet, and zero waiting stress.', link: '#booking' },
+    { icon: <MapPin size={22} />, title: 'Railway Station Pick & Drop', desc: 'Reliable pickup and drop service to all major railway stations. On-time arrivals, luggage assistance, and hassle-free rides.', link: '#booking' },
+    { icon: <Church size={22} />, title: 'Spiritual &amp; Pilgrimage Tours', desc: "Char Dham, Ujjain, Dwarka and beyond - reverent journeys to India's most sacred destinations, planned with devotion.", link: '#packages' },
+    { icon: <Building2 size={22} />, title: 'Corporate Travel', desc: 'Seamless travel management for government and corporate organizations. Contract vehicles, group travel and executive solutions.', link: '#booking' },
+  ];
+
+  return (
+    <section id="services" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="text-center mb-12 md:mb-16 reveal-down">
+          <div className="section-label mb-3 md:mb-4">What We Offer</div>
+          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+            Travel Services<br className="md:hidden" /> Crafted for <em>Comfort</em>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-white/[0.08] rounded-lg overflow-hidden reveal-scale">
+          {services.map((service, i) => (
+            <div
+              key={service.title}
+              className={`service-card bg-[#0a0a0a] p-6 md:p-10 lg:p-12 relative overflow-hidden group transition-all duration-400 hover:bg-[#111] ${
+                i < services.length - 1 ? 'border-b border-white/[0.08]' : ''
+              } ${i % 2 === 0 && i < services.length - 1 ? 'sm:border-r lg:border-r border-white/[0.08]' : ''} ${i % 3 !== 2 ? 'lg:border-r border-white/[0.08]' : ''}`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-white/[0.03] border border-white/[0.08] rounded flex items-center justify-center mb-5 md:mb-7 text-white/70 group-hover:text-red-light group-hover:border-red/30 transition-all duration-300">
+                  {service.icon}
+                </div>
+                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal text-white mb-2 md:mb-3">{service.title}</h3>
+                <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.8]">{service.desc}</p>
+                <a href={service.link} className="inline-flex items-center gap-2 mt-4 md:mt-6 text-[10px] md:text-[11px] tracking-[2px] uppercase text-red hover:gap-4 transition-all duration-300">
+                  Explore <ChevronRight size={14} />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── About ─── */
+function About() {
+  const features = [
+    { strong: '10+ Years', text: 'of industry expertise &amp; local knowledge' },
+    { strong: 'Safety First', text: '- sanitized vehicles, trained drivers, regular checks' },
+    { strong: 'Transparent Pricing', text: '- no hidden charges, ever' },
+    { strong: 'Government &amp; Corporate', text: 'approved travel contracts' },
+    { strong: '24/7 Support', text: '- your ride is always just a call away' },
+  ];
+
+  return (
+    <section id="about" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-center">
+          <div className="relative order-2 lg:order-1 reveal-left">
+            <div className="w-full aspect-[4/5] relative rounded overflow-hidden max-w-[500px] mx-auto lg:mx-0">
+              <img
+                src="/images/about_journey.webp"
+                srcSet="/images/about_journey-400.webp 400w, /images/about_journey-800.webp 800w, /images/about_journey.webp 1200w"
+                sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 500px"
+                alt="Family journey"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="absolute -bottom-6 md:-bottom-8 -right-2 md:-right-4 lg:-right-8 glass-card rounded-lg p-4 md:p-6 lg:p-7 min-w-[140px] md:min-w-[180px]">
+              <div className="font-playfair text-[32px] md:text-[48px] font-light text-red leading-none">10+</div>
+              <div className="text-[10px] md:text-[11px] text-white/50 tracking-[1px] mt-1 md:mt-2">Years of Excellence</div>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 reveal-right">
+            <div className="section-label mb-3 md:mb-4">Our Story</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
+              Your Most Trusted<br /><em>Travel Partner</em><br />in Gujarat
+            </h2>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-4 md:mb-5">
+              For over a decade, Maa Tour &amp; Travels has been the most respected name in travel across Bhuj, Gujarat, Rajasthan, Maharashtra and Goa. Founded with a passion for making travel accessible, comfortable and unforgettable.
+            </p>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-6 md:mb-8">
+              Our commitment: economical pricing, friendly staff, expert drivers and completely transparent service - because your dream holiday deserves nothing less than perfection.
+            </p>
+
+            <div className="flex flex-col gap-3 md:gap-4">
+              {features.map((f) => (
+                <div key={f.strong} className="flex items-start md:items-center gap-3 md:gap-4 p-3 md:p-4 bg-white/[0.03] border border-white/[0.08] rounded transition-all duration-300 hover:bg-white/[0.06] hover:border-red/30">
+                  <div className="w-6 h-6 md:w-7 md:h-7 min-w-[24px] md:min-w-[28px] rounded-full bg-red-pale border border-red/30 flex items-center justify-center mt-0.5 md:mt-0">
+                    <Check size={12} className="text-red" />
+                  </div>
+                  <span className="text-[12px] md:text-[13px] text-white/50 leading-[1.6]">
+                    <strong className="text-white font-medium">{f.strong}</strong> {f.text}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      </div>
+    </section>
+  );
+}
 
-      {/* Main content */}
-      <div style={{ padding: "16px 14px" }}>
-        <div style={{ marginBottom: 16 }}>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: colors.dark }}>{pageLabels[page]}</h1>
-          <div style={{ width: 36, height: 3, background: `linear-gradient(90deg, ${colors.primary}, ${colors.primaryLight})`, borderRadius: 2, marginTop: 6 }} />
+/* ─── Packages ─── */
+function Packages() {
+  const packages = [
+    {
+      img: '/images/saurashtra.webp',
+      dur: '3 Days',
+      route: 'Rajkot -> Somnath -> Dwarka -> Return',
+      name: 'Saurashtra Darshan',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '7,500',
+      featured: false,
+    },
+    {
+      img: '/images/kutch.webp',
+      dur: '2 Days',
+      route: 'Bhuj -> Rann of Kutch -> Mandvi -> Return',
+      name: 'Rann of Kutch',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '6,500',
+      featured: false,
+    },
+    {
+      img: '/images/goa.webp',
+      dur: '5 Days',
+      route: 'Panaji -> Calangute -> Baga -> Palolem -> Return',
+      name: 'Goa Paradise',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '12,000',
+      featured: false,
+    },
+    {
+      img: '/images/himachal.webp',
+      dur: '6 Days',
+      route: 'Shimla -> Manali -> Dharamshala -> Return',
+      name: 'Himachal Pradesh',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '15,000',
+      featured: false,
+    },
+    {
+      img: '/images/rajasthan.webp',
+      dur: '5 Days',
+      route: 'Bhuj -> Jaipur -> Jaisalmer -> Udaipur',
+      name: 'Rajasthan Royal Heritage',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '9,500',
+      featured: true,
+    },
+    {
+      img: '/images/gujarat.webp',
+      dur: '4 Days',
+      route: 'Ahmedabad -> Vadodara -> Surat -> Bhuj',
+      name: 'Gujarat Splendour',
+      pax: 'Up to 6',
+      vehicle: 'A/C Vehicle',
+      price: '8,000',
+      featured: false,
+    },
+  ];
+
+  return (
+    <section id="packages" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 bg-[#0a0a0a]">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-14 reveal">
+          <div>
+            <div className="section-label mb-3 md:mb-4">Featured Tours</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+              Our Most Beloved<br /><em>Journeys</em>
+            </h2>
+          </div>
+          <a href="#booking" className="group flex items-center gap-3 text-white text-[11px] md:text-[12px] tracking-[2px] uppercase mt-4 md:mt-0 transition-all duration-300 hover:gap-5">
+            <span className="w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/15 flex items-center justify-center group-hover:bg-white/10 group-hover:border-red transition-all duration-300">
+              <ArrowRight size={16} />
+            </span>
+            Custom Package
+          </a>
         </div>
-        {pages[page]}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {packages.map((pkg, i) => (
+            <div key={pkg.name} className={`pkg-card bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden transition-all duration-500 group card-3d reveal-up reveal-delay-${i + 1} ${pkg.featured ? 'border-red/40' : ''}`}>
+              {pkg.featured && (
+                <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10 bg-red text-black text-[8px] md:text-[9px] tracking-[2px] uppercase px-2.5 md:px-3 py-0.5 md:py-1 rounded-sm">
+                  Popular
+                </div>
+              )}
+              <div className="h-[180px] md:h-[220px] relative overflow-hidden">
+                <img src={pkg.img} srcSet={`${pkg.img.replace(".webp","-400.webp")} 400w, ${pkg.img.replace(".webp","-800.webp")} 800w, ${pkg.img} 1200w`} sizes="(max-width: 640px) 400px, 600px" alt={pkg.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
+                <div className="absolute top-3 md:top-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-red-light rounded-sm">
+                  {pkg.dur}
+                </div>
+                <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 glass-card px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-white/70 rounded-sm">
+                  {pkg.vehicle}
+                </div>
+              </div>
+              <div className="p-4 md:p-6">
+                <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-2">{pkg.route}</div>
+                <h3 className="font-playfair text-[18px] md:text-[22px] font-normal leading-tight text-white mb-3 md:mb-4">{pkg.name}</h3>
+                <div className="flex items-center gap-3 mb-4 md:mb-5">
+                  <span className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-white/50"><Users size={11} /> {pkg.pax} Passengers</span>
+                </div>
+                <div className="pt-3 md:pt-4 border-t border-white/[0.08]">
+                  <a href="#booking" className="btn-3d-wrapper block w-full">
+                    <span className="btn-3d flex items-center justify-center gap-2 w-full bg-white/[0.05] border border-white/[0.15] text-white text-[9px] md:text-[10px] tracking-[2px] uppercase px-3 md:px-4 py-2.5 md:py-3 rounded-sm group-hover:bg-red group-hover:border-red group-hover:text-white transition-colors duration-300">
+                      <Car size={12} /> Book Cab
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ─── */
+function Testimonials() {
+  const testimonials = [
+    { stars: 5, text: '"Best trip destination knowledge, too much cooperative and honest, excellent service, driving skill excellent. Highly recommend to everyone."', name: 'Rajesh Mehta', loc: 'Bhuj, Gujarat', avatar: 'R' },
+    { stars: 5, text: '"Best service and best travel planner in Bhuj - all Gujarat, Rajasthan, Maharashtra and Goa. Most popular and trusted."', name: 'Priya Sharma', loc: 'Ahmedabad, Gujarat', avatar: 'P' },
+    { stars: 5, text: '"Very good service, enjoyed my trip a lot, cars are also good and completely satisfied with the driver. They deserve to be at the top."', name: 'Amit Patel', loc: 'Surat, Gujarat', avatar: 'A' },
+    { stars: 5, text: '"Economical cost, friendly staff and drivers, affordable trip for family. Comfortable and suitable for any occasion. Absolutely loved every moment!"', name: 'Sunita Joshi', loc: 'Vadodara, Gujarat', avatar: 'S' },
+    { stars: 5, text: '"Our Saurashtra darshan was perfectly planned. The driver was so knowledgeable about local temples and traditions. Truly a spiritual experience."', name: 'Deepak Trivedi', loc: 'Mumbai, Maharashtra', avatar: 'D' },
+    { stars: 5, text: '"They arranged our company annual trip flawlessly - 40 employees, 4 days in Goa. Every detail was perfect. Will definitely book again."', name: 'Kavita Bhai', loc: 'Bhuj, Gujarat', avatar: 'K' },
+    { stars: 5, text: '"The Kutch trip was magical. Sanitized car, professional driver, great hotel recommendations. Maa Tours truly made it once in a lifetime."', name: 'Mohan Desai', loc: 'Bhavnagar, Gujarat', avatar: 'M' },
+    { stars: 5, text: '"Airport pickup was seamless, driver was on time and very polite. Baggage transfer was smooth. Will use Maa Tours for all my future travel needs."', name: 'Neha Chauhan', loc: 'Junagadh, Gujarat', avatar: 'N' },
+  ];
+
+  const allTestimonials = [...testimonials, ...testimonials];
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollStart, setScrollStart] = useState(0);
+  const resumeTimerRef = useRef<number | null>(null);
+  const wasDraggingRef = useRef(false);
+  const animationRef = useRef<Animation | null>(null);
+
+  const clearResumeTimer = () => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  };
+
+  const startResumeTimer = () => {
+    clearResumeTimer();
+    resumeTimerRef.current = window.setTimeout(() => {
+      setIsPaused(false);
+    }, 15000);
+  };
+
+  // Start CSS animation when not paused
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    if (!isPaused) {
+      // Create or resume animation
+      const keyframes = [
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-50%)' }
+      ];
+      const options: KeyframeAnimationOptions = {
+        duration: 20000,
+        iterations: Infinity,
+        easing: 'linear'
+      };
+
+      if (animationRef.current) {
+        animationRef.current.play();
+      } else {
+        animationRef.current = track.animate(keyframes, options);
+      }
+    } else {
+      // Pause animation
+      if (animationRef.current) {
+        animationRef.current.pause();
+      }
+    }
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.cancel();
+        animationRef.current = null;
+      }
+    };
+  }, [isPaused]);
+
+  const handleMouseEnter = () => {
+    if (!isDragging) {
+      setIsPaused(true);
+      clearResumeTimer();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging) {
+      startResumeTimer();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    clearResumeTimer();
+    wasDraggingRef.current = false;
+    setStartX(e.pageX);
+    setScrollStart(containerRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
+    wasDraggingRef.current = true;
+    const walk = (e.pageX - startX) * 1.5;
+    containerRef.current.scrollLeft = scrollStart - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    startResumeTimer();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!containerRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    clearResumeTimer();
+    wasDraggingRef.current = false;
+    setStartX(e.touches[0].pageX);
+    setScrollStart(containerRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    wasDraggingRef.current = true;
+    const walk = (e.touches[0].pageX - startX) * 1.5;
+    containerRef.current.scrollLeft = scrollStart - walk;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    startResumeTimer();
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (wasDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    wasDraggingRef.current = false;
+  };
+
+  useEffect(() => {
+    return () => {
+      clearResumeTimer();
+      if (animationRef.current) {
+        animationRef.current.cancel();
+      }
+    };
+  }, []);
+
+  return (
+    <section id="testimonials" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="text-center mb-10 md:mb-16 reveal-down">
+          <div className="section-label mb-3 md:mb-4">Traveller Stories</div>
+          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+            Memories Crafted,<br /><em>Trust Earned</em>
+          </h2>
+        </div>
       </div>
 
-      {/* Bottom Tab Bar */}
-      <div style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: "#fff",
-        borderTop: "1px solid #e2e8f0",
-        display: "flex",
-        justifyContent: "space-around",
-        padding: "6px 0 12px",
-        zIndex: 50,
-        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
-      }}>
-        {NAV.slice(0, 5).map(n => (
-          <button key={n.key} onClick={() => setPage(n.key)} style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 3,
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: "4px 6px",
-            color: page === n.key ? colors.primary : colors.grayLight,
-            fontSize: 10,
-            fontWeight: page === n.key ? 700 : 500,
-            fontFamily: "inherit",
-            minWidth: 0,
-            flex: 1,
-          }}>
-            <div style={{ color: page === n.key ? colors.primary : colors.grayLight }}>
-              <n.icon />
+      <div 
+        ref={containerRef}
+        className="overflow-x-auto scrollbar-hide"
+        style={{ 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={handleClick}
+      >
+        <div 
+          ref={trackRef}
+          className="flex gap-4 md:gap-6"
+          style={{ width: 'max-content' }}
+        >
+          {allTestimonials.map((t, i) => (
+            <div 
+              key={i} 
+              className="testi-card min-w-[300px] md:min-w-[380px] max-w-[300px] md:max-w-[380px] bg-[#111] border border-white/[0.08] rounded-lg p-5 md:p-8 flex-shrink-0 transition-all duration-300 hover:border-red/30 select-none"
+            >
+              <div className="flex gap-1 mb-3 md:mb-4">
+                {Array.from({ length: t.stars }).map((_, j) => (
+                  <Star key={j} size={13} className="text-red fill-red" />
+                ))}
+              </div>
+              <p className="font-playfair text-[15px] md:text-[17px] italic font-light leading-[1.7] text-white/90 mb-4 md:mb-6">{t.text}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-red/30 to-red/10 flex items-center justify-center font-playfair text-[14px] md:text-[16px] text-red-light border border-red/30">
+                  {t.avatar}
+                </div>
+                <div>
+                  <div className="text-[12px] md:text-[13px] font-medium text-white">{t.name}</div>
+                  <div className="text-[10px] md:text-[11px] text-white/50 tracking-[1px]">{t.loc}</div>
+                </div>
+              </div>
             </div>
-            <span style={{ whiteSpace: "nowrap" }}>{n.label}</span>
-          </button>
-        ))}
-        <button onClick={() => setMenuOpen(true)} style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 3,
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          padding: "4px 6px",
-          color: colors.grayLight,
-          fontSize: 10,
-          fontWeight: 500,
-          fontFamily: "inherit",
-          minWidth: 0,
-          flex: 1,
-        }}>
-          <div>☰</div>
-          <span>More</span>
-        </button>
+          ))}
+        </div>
       </div>
+    </section>
+  );
+}
+
+/* ─── Our Fleet ─── */
+function OurFleet() {
+  const cars = [
+    { name: 'Ertiga', slug: 'ertiga', type: 'MPV · 7 Seater', desc: 'Spacious and comfortable MPV, ideal for family trips and group travel across Gujarat.' },
+    { name: 'Toyota Innova', slug: 'toyota-innova', type: 'SUV · 7 Seater', desc: 'The gold standard in premium cab travel — powerful, plush, and perfect for long journeys.' },
+    { name: 'Innova Crysta', slug: 'innova-crysta', type: 'SUV · 7 Seater', desc: 'Premium variant of the Innova with superior interiors and ride comfort for discerning travellers.' },
+    { name: 'Sedan', slug: 'sedan', type: 'Sedan · 4 Seater', desc: 'Sleek and fuel-efficient sedan for comfortable airport transfers and city rides.' },
+    { name: 'Toofan (Non-AC)', slug: 'toofan-non-ac', type: 'Van · 8 Seater', desc: 'Rugged and economical van — perfect for group travel on a budget without compromising on space.' },
+    { name: 'Toofan (AC)', slug: 'toofan-ac', type: 'Van · 8 Seater', desc: 'Air-conditioned Toofan for comfortable group journeys in all seasons across Gujarat.' },
+    { name: 'Tempo Traveller', slug: 'tempo-traveller', type: 'Minivan · 12–17 Seater', desc: 'The ultimate choice for large group travel — spacious, comfortable, and built for long routes.' },
+    { name: 'Bus', slug: 'bus', type: 'Bus · 20–50 Seater', desc: 'Full-size buses for corporate trips, school excursions, and large group pilgrimages across India.' },
+    { name: 'Urbania', slug: 'urbania', type: 'Luxury Van · 17 Seater', desc: 'Force Urbania — a luxury coach with premium seating for a first-class group travel experience.' },
+  ];
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollStart, setScrollStart] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+    setScrollStart(scrollRef.current?.scrollLeft ?? 0);
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    scrollRef.current.scrollLeft = scrollStart - (e.pageX - startX);
+  };
+  const onMouseUp = () => setIsDragging(false);
+
+  return (
+    <section className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="text-center mb-10 md:mb-16 reveal-down">
+          <div className="section-label mb-3 md:mb-4">Our Fleet</div>
+          <h2 className="section-title text-[clamp(28px,5vw,56px)]">
+            Travel in <em>Comfort &amp; Style</em>
+          </h2>
+          <p className="text-[13px] md:text-[14px] text-white/50 mt-3 md:mt-4 max-w-[480px] mx-auto leading-[1.8]">Swipe to explore the vehicles we use for your journeys</p>
+        </div>
+      </div>
+      <div
+        ref={scrollRef}
+        className="overflow-x-auto scrollbar-hide px-4 md:px-8 lg:px-12"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', cursor: isDragging ? 'grabbing' : 'grab', WebkitOverflowScrolling: 'touch' }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+      >
+        <div className="flex gap-4 md:gap-6" style={{ width: 'max-content', paddingBottom: '8px' }}>
+          {cars.map((car) => (
+            <div
+              key={car.slug}
+              className="flex-shrink-0 w-[280px] md:w-[360px] bg-[#111] border border-white/[0.08] rounded-lg overflow-hidden group hover:border-red/30 transition-all duration-300 select-none"
+            >
+              {/* Car Image */}
+              <div className="h-[180px] md:h-[220px] bg-white/[0.03] relative overflow-hidden flex items-center justify-center">
+                <img
+                  src={`/images/${car.slug}.webp`}
+                  alt={car.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    // Fallback chain: webp → jpeg → placeholder
+                    if (img.src.endsWith('.webp')) {
+                      img.src = `/images/${car.slug}.jpeg`;
+                      return;
+                    }
+                    img.style.display = 'none';
+                    const parent = img.parentElement;
+                    if (parent && !parent.querySelector('.placeholder-icon')) {
+                      const ph = document.createElement('div');
+                      ph.className = 'placeholder-icon flex flex-col items-center justify-center gap-3 absolute inset-0';
+                      ph.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="6" rx="1"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg><span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2)">Image Coming Soon</span>`;
+                      parent.appendChild(ph);
+                    }
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-3 left-3 glass-card px-2.5 py-0.5 text-[9px] tracking-[1.5px] uppercase text-red-light rounded-sm">
+                  {car.type}
+                </div>
+              </div>
+              {/* Car Info */}
+              <div className="p-5 md:p-6">
+                <h3 className="font-playfair text-[20px] md:text-[24px] font-normal text-white mb-2">{car.name}</h3>
+                <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.7]">{car.desc}</p>
+                <a
+                  href="#booking"
+                  className="mt-4 flex items-center gap-2 text-[9px] md:text-[10px] tracking-[2px] uppercase text-red hover:text-red-light transition-colors duration-300"
+                >
+                  <Car size={12} /> Book This Car
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+function Contact() {
+  const [formData, setFormData] = useState({
+    name: '',
+    serviceType: '',
+    carType: '',
+    pickup: '',
+    drop: '',
+    date: '',
+    time: ''
+  });
+
+  const cities = [
+    'Ahmedabad', 'Vadodara', 'Rajkot', 'Jamnagar', 'Surat', 'Porbandar', 'Junagadh', 'Morbi', 'Anand',
+    'Patan', 'Bharuch', 'Bhavnagar', 'Mehsana', 'Navsari', 'Bhuj', 'Gandhidham', 'Gondal', 'Gandhinagar',
+    'Godhra', 'Palanpur', 'Nadiad', 'Valsad', 'Deesa', 'Kheda', 'Amreli', 'Botad', 'Vapi', 'Veraval',
+    'Kalol', 'Jetpur', 'Dudhrej', 'Chhota Udepur', 'Dahod', 'Mandavi', 'Vankaner', 'Idar', 'Lunawada',
+    'Khambhariya', 'Himatnagar', 'Modasa', 'Vyara', 'Rajpipla', 'Dhandhuka', 'Ankleshwar', 'Padra',
+    'Bhachau', 'Jambusar', 'Ranavav', 'Dwarka', 'Okha', 'Saputara', 'Somnath', 'Una', 'Diu', 'Daman',
+    'Viramgam', 'Harvard', 'Matamadh', 'Mundra', 'Bhanvad', 'Sasangir', 'Udaipur', 'Chittorgarh',
+    'Nathdwara', 'Abu', 'Sirohi', 'Jodhpur', 'Ajmer', 'Kumbhalgarh', 'Pindwada', 'Jaalol', 'Radhanpur'
+  ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const serviceLabel = formData.serviceType === 'airport' ? 'Airport Pick & Drop' : formData.serviceType === 'railway' ? 'Railway Station Pick & Drop' : 'Outstation Pick & Drop';
+    const msg = `Hello Maa Travels! I would like to book a journey.
+
+*Service Type:* ${serviceLabel}
+*Car Type:* ${formData.carType || 'Not specified'}
+*Name:* ${formData.name}
+*Pickup:* ${formData.pickup}
+*Drop:* ${formData.drop}
+*Date:* ${formData.date}
+*Time:* ${formData.time}`;
+    const encodedMsg = encodeURIComponent(msg);
+    window.open(`https://wa.me/919558050710?text=${encodedMsg}`, '_blank');
+  };
+
+  const contactItems = [
+    { icon: <Phone size={16} />, label: 'Call Us', val: '+91 9558050710' },
+    { icon: <MessageCircle size={16} />, label: 'WhatsApp', val: '+91 9558050710' },
+    { icon: <Mail size={16} />, label: 'Email', val: 'info@maatourandtravels.in' },
+    { icon: <MapPinned size={16} />, label: 'Office', val: 'Bhuj, Gujarat, India' },
+  ];
+
+  return (
+    <section id="contact" className="py-16 md:py-24 lg:py-32 px-4 md:px-8 lg:px-12 bg-gradient-to-br from-[#0a0a0a] to-[#111] relative overflow-hidden">
+      <div className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-red/5 blur-[100px] md:blur-[150px] -top-[100px] md:-top-[200px] -right-[100px] md:-right-[200px] pointer-events-none" />
+
+      <div className="max-w-[1400px] mx-auto relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20">
+          <div className="reveal-left">
+            <div className="section-label mb-3 md:mb-4">Get In Touch</div>
+            <h2 className="section-title text-[clamp(28px,5vw,56px)] mb-4 md:mb-6">
+              Begin Your<br /><em>Journey</em><br />With Us Today
+            </h2>
+            <p className="text-[13px] md:text-[15px] text-white/50 leading-[1.9] mb-8 md:mb-10">
+              Whether you're planning a family holiday, a spiritual pilgrimage, a corporate retreat or simply need a reliable ride - we're here, ready to make it extraordinary.
+            </p>
+
+            <div className="flex flex-col gap-3 md:gap-5">
+              {contactItems.map((item) => (
+                <div key={item.label} className="flex items-center gap-3 md:gap-4 p-4 md:p-5 bg-white/[0.03] border border-white/[0.08] rounded transition-all duration-300 hover:bg-white/[0.06] hover:border-red/30">
+                  <div className="w-10 h-10 md:w-11 md:h-11 min-w-[40px] md:min-w-[44px] bg-red-pale border border-red/20 rounded flex items-center justify-center text-red">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <div className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-red mb-0.5">{item.label}</div>
+                    <div className="text-[13px] md:text-[14px] text-white">{item.val}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="reveal-right" id="booking">
+            <form onSubmit={handleSubmit} className="glass-card rounded-lg p-6 md:p-8 lg:p-12">
+              <h3 className="font-playfair text-[22px] md:text-[28px] font-light text-white mb-4 md:mb-6">Plan Your Journey</h3>
+
+              {/* Service Type Selector */}
+              <div className="flex flex-col gap-2 mb-5 md:mb-6">
+                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Service Type</label>
+                <div className="grid grid-cols-3 gap-2 md:gap-3">
+                  {([
+                    { value: 'airport', label: 'Airport', icon: <Plane size={15} /> },
+                    { value: 'railway', label: 'Railway', icon: <MapPinned size={15} /> },
+                    { value: 'outstation', label: 'Outstation', icon: <Car size={15} /> },
+                  ] as { value: string; label: string; icon: React.ReactNode }[]).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, serviceType: opt.value })}
+                      className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded text-[9px] tracking-[1.5px] uppercase font-medium transition-all duration-300 border ${
+                        formData.serviceType === opt.value
+                          ? 'bg-red border-red text-white'
+                          : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
+                      }`}
+                    >
+                      {opt.icon}
+                      <span className="leading-none">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Car Type Selector */}
+              <div className="flex flex-col gap-2 mb-5 md:mb-6">
+                <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Select Car Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { value: 'Ertiga', label: 'Ertiga' },
+                    { value: 'Toyota Innova', label: 'Innova' },
+                    { value: 'Innova Crysta', label: 'Crysta' },
+                    { value: 'Sedan', label: 'Sedan' },
+                    { value: 'Toofan (Non-AC)', label: 'Toofan Non-AC' },
+                    { value: 'Toofan (AC)', label: 'Toofan AC' },
+                    { value: 'Tempo Traveller', label: 'Tempo' },
+                    { value: 'Bus', label: 'Bus' },
+                    { value: 'Urbania', label: 'Urbania' },
+                  ] as { value: string; label: string }[]).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, carType: opt.value })}
+                      className={`flex items-center justify-center gap-1.5 py-2.5 px-1 rounded text-[9px] tracking-[1px] uppercase font-medium transition-all duration-300 border ${
+                        formData.carType === opt.value
+                          ? 'bg-red border-red text-white'
+                          : 'bg-white/5 border-white/[0.08] text-white/60 hover:border-red/40 hover:text-white'
+                      }`}
+                    >
+                      <Car size={11} />
+                      <span className="leading-none truncate">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 md:gap-4 mb-5 md:mb-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Your Name</label>
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Full name" 
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                    required 
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Pickup Location</label>
+                  <select 
+                    name="pickup"
+                    value={formData.pickup}
+                    onChange={handleChange}
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-black text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all"
+                    required
+                  >
+                    <option value="">Select pickup city</option>
+                    {cities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Drop Location</label>
+                  <select 
+                    name="drop"
+                    value={formData.drop}
+                    onChange={handleChange}
+                    className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-black text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all"
+                    required
+                  >
+                    <option value="">Select drop city</option>
+                    {cities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Date</label>
+                    <input 
+                      type="date" 
+                      name="date"
+                      value={formData.date}
+                      onChange={handleChange}
+                      className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[9px] md:text-[10px] tracking-[2px] uppercase text-white/50">Time</label>
+                    <input 
+                      type="time" 
+                      name="time"
+                      value={formData.time}
+                      onChange={handleChange}
+                      className="bg-white/5 border border-white/[0.08] rounded px-3 md:px-4 py-2.5 md:py-3 text-white text-sm outline-none focus:border-red/50 focus:bg-white/[0.08] transition-all" 
+                      required 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!formData.serviceType}
+                className="w-full py-3.5 md:py-4 rounded-sm text-[10px] md:text-[11px] tracking-[3px] uppercase font-inter font-medium transition-all duration-300 btn-3d bg-red text-black hover:bg-red-light disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Send Booking Enquiry
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+/* ─── Footer ─── */
+function Footer() {
+  return (
+    <footer className="bg-black pt-12 md:pt-20 pb-8 md:pb-10 px-4 md:px-8 lg:px-12 border-t border-white/[0.08]">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16 mb-10 md:mb-16">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <img src="/images/logo.webp" alt="Maa Travels" className="h-8 md:h-10 w-auto rounded" />
+              <span className="font-playfair text-xl md:text-2xl text-white">
+                Maa <span className="text-red">Travels</span>
+              </span>
+            </div>
+            <p className="text-[12px] md:text-[13px] text-white/50 leading-[1.8] max-w-[300px]">
+              Your trusted journey companion for over a decade. Crafting unforgettable experiences across India's most magnificent destinations.
+            </p>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Destinations</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['Saurashtra', 'Kutch', 'Rajasthan', 'Himachal', 'Goa', 'Gujarat'].map((item) => (
+                <li key={item}>
+                  <a href="#destinations" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Services</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['Tour Packages', 'Taxi Service', 'Airport Pick & Drop', 'Railway Pick & Drop', 'Pilgrimage Tours', 'Corporate Travel'].map((item) => (
+                <li key={item}>
+                  <a href="#services" className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[10px] tracking-[3px] uppercase text-red mb-4 md:mb-6">Company</div>
+            <ul className="flex flex-col gap-2 md:gap-3">
+              {['About Us', 'Testimonials', 'Contact', 'WhatsApp Us'].map((item) => (
+                <li key={item}>
+                  <a href={item === 'About Us' ? '#about' : item === 'Testimonials' ? '#testimonials' : item === 'Contact' ? '#contact' : '#contact'} className="text-[12px] md:text-[13px] text-white/50 hover:text-red-light transition-colors duration-300 flex items-center gap-2 group">
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">-</span>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center pt-6 md:pt-8 border-t border-white/[0.08] text-[11px] md:text-[12px] text-white/50 gap-2 md:gap-4">
+          <div>© 2025 Maa Tour &amp; Travels. All rights reserved.</div>
+          <div>
+            Designed with <span className="text-red">♥</span> in Bhuj, Gujarat | <a href="#" className="text-red-light hover:underline">maatourandtravels.in</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ─── WhatsApp Button ─── */
+function WhatsAppButton() {
+  return (
+    <a
+      href="https://wa.me/919558050710"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 md:bottom-8 right-4 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-[#25D366] rounded-full flex items-center justify-center whatsapp-pulse hover:scale-110 transition-transform duration-300"
+      aria-label="Chat on WhatsApp"
+    >
+      <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6 md:w-7 md:h-7">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+    </a>
+  );
+}
+
+/* ─── Splash Screen ─── */
+function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isFading, setIsFading] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const doneRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const finish = () => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsFading(true);
+    setTimeout(() => {
+      document.body.style.overflow = '';
+      window.scrollTo(0, 0);
+      onComplete();
+    }, 600);
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    // 10-second safety net — if video never becomes playable, open the site
+    timeoutRef.current = setTimeout(() => finish(), 10000);
+
+    // `loadeddata` fires as soon as the first frame is decoded (earliest possible —
+    // effectively ~1% downloaded). Switch to video immediately at this point.
+    const handleLoadedData = () => {
+      setVideoReady(true);
+      video.play().catch(() => finish());
+    };
+
+    const handleEnded = () => finish();
+    const handleError  = () => finish();
+
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('ended',      handleEnded);
+    video.addEventListener('error',      handleError);
+
+    return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('ended',      handleEnded);
+      video.removeEventListener('error',      handleError);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+      style={{
+        opacity: isFading ? 0 : 1,
+        transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents: isFading ? 'none' : 'all',
+      }}
+    >
+      {/* Video — invisible until first frame is ready, then fades in */}
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          opacity: videoReady ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+        }}
+      >
+        <source src="/videos/splash.webm" type="video/webm" />
+        <source src="/videos/splash.mp4"  type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-black/20" />
+
+
     </div>
   );
 }
+
+/* ─── Main App ─── */
+function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const progress = useScrollProgress();
+  useReveal();
+  usePerformanceBoost();
+
+  return (
+    <>
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
+      <div className="bg-black text-white min-h-screen relative">
+          <style>{`
+            @keyframes testiScroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+        <CustomCursor />
+        <div
+          className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-red to-red-light z-[1000] transition-all duration-100"
+          style={{ width: progress + '%' }}
+        />
+        <Navbar />
+        <Hero splashDone={splashDone} />
+        <Marquee />
+        <Destinations />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+        <Services />
+        <About />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-4 md:mx-8 lg:mx-12" />
+        <Packages />
+        <Testimonials />
+        <OurFleet />
+        <Contact />
+        <Footer />
+        <WhatsAppButton />
+      </div>
+    </>
+  );
+}
+
+export default App;
